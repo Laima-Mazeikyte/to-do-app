@@ -1,0 +1,104 @@
+/* ============================================
+   Design tokens – primitives + semantic (light/dark)
+   ============================================ */
+
+:root {
+  /* ----- Primitives: colors ----- */
+  --color-white: #ffffff;
+  --color-gray-50: #fafafa;
+  --color-gray-100: #f5f5f5;
+  --color-gray-200: #e5e5e5;
+  --color-gray-300: #d4d4d4;
+  --color-gray-400: #a3a3a3;
+  --color-gray-500: #737373;
+  --color-gray-600: #525252;
+  --color-gray-700: #404040;
+  --color-gray-800: #262626;
+  --color-gray-900: #171717;
+  --color-gray-950: #0a0a0a;
+
+  --color-blue-300: #93c5fd;
+  --color-blue-400: #60a5fa;
+  --color-blue-500: #3b82f6;
+  --color-blue-600: #2563eb;
+
+  --color-green-400: #4ade80;
+  --color-green-500: #22c55e;
+  --color-green-600: #16a34a;
+
+  --color-red-400: #f87171;
+  --color-red-500: #ef4444;
+  --color-red-600: #dc2626;
+
+  --color-amber-400: #fbbf24;
+  --color-amber-500: #f59e0b;
+  --color-amber-600: #d97706;
+
+  /* ----- Primitives: spacing (4px base) ----- */
+  --space-0: 0;
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.25rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-10: 2.5rem;
+  --space-12: 3rem;
+
+  /* ----- Primitives: typography ----- */
+  --font-sans: system-ui, Avenir, Helvetica, Arial, sans-serif;
+  --font-size-sm: 0.875rem;
+  --font-size-base: 1rem;
+  --font-size-lg: 1.125rem;
+  --line-height-normal: 1.5;
+
+  /* ----- Primitives: border radius ----- */
+  --radius-sm: 0.25rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+
+  /* ----- Semantic: light theme (default) ----- */
+  --background-default: var(--color-white);
+  --background-subtle: var(--color-gray-50);
+  --background-muted: var(--color-gray-100);
+
+  --foreground-default: var(--color-gray-900);
+  --foreground-muted: var(--color-gray-600);
+
+  --border-default: var(--color-gray-200);
+  --border-muted: var(--color-gray-100);
+
+  --accent-default: var(--color-blue-500);
+  --accent-emphasis: var(--color-blue-600);
+
+  --success-default: var(--color-green-500);
+  --success-emphasis: var(--color-green-600);
+  --danger-default: var(--color-red-500);
+  --danger-emphasis: var(--color-red-600);
+  --warning-default: var(--color-amber-500);
+  --warning-emphasis: var(--color-amber-600);
+}
+
+/* Dark theme: semantic overrides */
+.dark {
+  --background-default: var(--color-gray-950);
+  --background-subtle: var(--color-gray-900);
+  --background-muted: var(--color-gray-800);
+
+  --foreground-default: var(--color-gray-50);
+  --foreground-muted: var(--color-gray-400);
+
+  --border-default: var(--color-gray-800);
+  --border-muted: var(--color-gray-900);
+
+  --accent-default: var(--color-blue-400);
+  --accent-emphasis: var(--color-blue-500);
+
+  --success-default: var(--color-green-500);
+  --success-emphasis: var(--color-green-400);
+  --danger-default: var(--color-red-500);
+  --danger-emphasis: var(--color-red-400);
+  --warning-default: var(--color-amber-500);
+  --warning-emphasis: var(--color-amber-400);
+}
