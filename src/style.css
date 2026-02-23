@@ -88,7 +88,7 @@ button:focus-visible {
 /* Todo app */
 .todo-app {
   width: 100%;
-  max-width: 36rem;
+  max-width: min(48rem, 90vw);
   margin: 0 auto;
   text-align: left;
 }
