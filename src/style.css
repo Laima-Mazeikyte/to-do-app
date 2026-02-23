@@ -38,10 +38,12 @@ h1 {
 }
 
 #app {
+  width: 100%;
   max-width: 1280px;
   margin: 0 auto;
   padding: var(--space-8);
   text-align: center;
+  box-sizing: border-box;
 }
 
 .logo {
@@ -87,8 +89,9 @@ button:focus-visible {
 
 /* Todo app */
 .todo-app {
-  width: 100%;
-  max-width: min(48rem, 90vw);
+  width: 40rem;
+  min-width: 24rem;
+  max-width: min(100%, 95vw);
   margin: 0 auto;
   text-align: left;
 }
