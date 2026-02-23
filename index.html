@@ -7,7 +7,29 @@
     <title>to-do-app</title>
   </head>
   <body>
-    <div id="app"></div>
+    <div id="app">
+      <section class="todo-app" aria-label="To-Do application">
+        <header class="todo-header">
+          <h1 class="todo-title">To-Do</h1>
+        </header>
+
+        <form id="todo-form" class="todo-form" aria-label="Add new task">
+          <label for="todo-input" class="todo-label">New task</label>
+          <input id="todo-input" class="todo-input" type="text" name="task" autocomplete="off" />
+          <button type="submit" id="todo-submit" class="todo-submit">Add</button>
+        </form>
+
+        <div class="todo-filters" role="tablist" aria-label="Filter tasks">
+          <button type="button" role="tab" class="todo-filter todo-filter--active" aria-selected="true" data-filter="all">All</button>
+          <button type="button" role="tab" class="todo-filter" aria-selected="false" data-filter="active">Active</button>
+          <button type="button" role="tab" class="todo-filter" aria-selected="false" data-filter="done">Done</button>
+        </div>
+
+        <ul id="todo-list" class="todo-list" aria-label="Task list">
+          <li class="todo-list-empty" aria-live="polite">No tasks yet.</li>
+        </ul>
+      </section>
+    </div>
     <script type="module" src="/src/main.js"></script>
   </body>
 </html>
