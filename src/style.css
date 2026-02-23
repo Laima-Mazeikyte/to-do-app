@@ -24,47 +24,38 @@ a:hover {
   color: var(--accent-emphasis);
 }
 
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 body {
   margin: 0;
   display: flex;
-  place-items: center;
+  place-items: start center;
   min-width: 320px;
   min-height: 100vh;
 }
 
 h1 {
-  font-size: 3.2em;
+  font-size: var(--font-size-xl);
   line-height: 1.1;
 }
 
 #app {
   width: 100%;
-  max-width: 1280px;
+  max-width: var(--layout-app-max);
   margin: 0 auto;
   padding: var(--space-8);
   text-align: center;
   box-sizing: border-box;
-}
-
-.logo {
-  height: 6em;
-  padding: var(--space-6);
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em color-mix(in srgb, var(--accent-default) 67%, transparent));
-}
-.logo.vanilla:hover {
-  filter: drop-shadow(0 0 2em color-mix(in srgb, var(--warning-default) 67%, transparent));
-}
-
-.card {
-  padding: var(--space-8);
-}
-
-.read-the-docs {
-  color: var(--foreground-muted);
 }
 
 button {
@@ -84,13 +75,13 @@ button:hover {
 }
 button:focus,
 button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
+  outline: var(--space-1) auto -webkit-focus-ring-color;
 }
 
 /* Todo app */
 .todo-app {
-  width: 40rem;
-  min-width: 24rem;
+  width: var(--layout-content-max);
+  min-width: var(--layout-content-min);
   max-width: min(100%, 95vw);
   margin: 0 auto;
   text-align: left;
@@ -113,9 +104,12 @@ button:focus-visible {
 }
 
 .todo-label {
-  grid-column: 1 / -1;
   font-size: var(--font-size-base);
   color: var(--foreground-default);
+}
+
+.todo-label:not(.sr-only) {
+  grid-column: 1 / -1;
 }
 
 .todo-input {
@@ -132,7 +126,7 @@ button:focus-visible {
 
 .todo-input:focus {
   outline: 2px solid var(--accent-default);
-  outline-offset: 2px;
+  outline-offset: var(--space-1);
 }
 
 .todo-submit {
@@ -172,8 +166,8 @@ button:focus-visible {
 
 .todo-item-checkbox {
   flex-shrink: 0;
-  width: 1.125rem;
-  height: 1.125rem;
+  width: var(--font-size-lg);
+  height: var(--font-size-lg);
   cursor: pointer;
   accent-color: var(--accent-default);
 }
