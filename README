@@ -1,12 +1,18 @@
 To Do App
 
-Features
+MVP Features
 
 - add, delete and edit 'to do' tasks
 - mark 'to do' tasks as done (with ability to uncheck)
+
+Ideas
+- copy day tasks/set up daily repeat tasks
+- have a week view
+- accountability scheme, 
 
 Tech stack
 
 - Vite
 - Vannila JS
 - No BE for now
+

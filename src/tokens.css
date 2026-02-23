@@ -51,7 +51,13 @@
   --font-size-sm: 0.875rem;
   --font-size-base: 1rem;
   --font-size-lg: 1.125rem;
+  --font-size-xl: 2rem;
   --line-height-normal: 1.5;
+
+  /* ----- Primitives: layout ----- */
+  --layout-app-max: 1280px;
+  --layout-content-max: 40rem;
+  --layout-content-min: 24rem;
 
   /* ----- Primitives: border radius ----- */
   --radius-sm: 0.25rem;
