@@ -1,0 +1,12 @@
+To Do App
+
+Features
+
+- add, delete and edit 'to do' tasks
+- mark 'to do' tasks as done (with ability to uncheck)
+
+Tech stack
+
+- Vite
+- Vannila JS
+- No BE for now
