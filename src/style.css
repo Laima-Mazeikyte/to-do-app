@@ -209,6 +209,17 @@ button:focus-visible {
   color: var(--foreground-default);
 }
 
+.todo-error {
+  padding: var(--space-3) var(--space-4);
+  margin-bottom: var(--space-3);
+  border-radius: var(--radius-md);
+  background-color: var(--background-muted);
+  border: 1px solid var(--border-default);
+  color: var(--foreground-default);
+  font-size: var(--font-size-sm);
+  text-align: left;
+}
+
 .todo-list-empty {
   padding: var(--space-4);
   color: var(--foreground-muted);

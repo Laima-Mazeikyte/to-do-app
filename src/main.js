@@ -1,39 +1,104 @@
 import './style.css'
+import { supabase } from './supabase.js'
 
 const form = document.getElementById('todo-form')
 const input = document.getElementById('todo-input')
 const list = document.getElementById('todo-list')
+const errorEl = document.getElementById('todo-error')
 const filterButtons = document.querySelectorAll('.todo-filter')
 
 let state = {
   tasks: [],
-  filter: 'all'
+  filter: 'all',
+  loading: !!supabase,
+  error: null // Supabase error message to show in UI
 }
 
-function addTask(text) {
-  if (!text.trim()) return
-  state.tasks.push({
-    id: crypto.randomUUID(),
-    text: text.trim(),
-    done: false
-  })
+function rowToTask(row) {
+  return { id: row.id, text: row.text, done: row.done }
+}
+
+async function loadTasks() {
+  if (!supabase) return
+  state.error = null
+  const { data, error } = await supabase
+    .from('todos')
+    .select('*')
+    .order('created_at', { ascending: true })
+  if (error) {
+    console.error('Failed to load todos:', error)
+    state.error = error.message || 'Failed to load tasks from database.'
+    state.loading = false
+    render()
+    return
+  }
+  state.tasks = (data || []).map(rowToTask)
+  state.loading = false
   render()
 }
 
-function removeTask(id) {
+async function addTask(text) {
+  if (!text.trim()) return
+  state.error = null
+  if (supabase) {
+    const { data, error } = await supabase
+      .from('todos')
+      .insert({ text: text.trim(), done: false })
+      .select()
+      .single()
+    if (error) {
+      console.error('Failed to add todo:', error)
+      state.error = error.message || 'Failed to save task to database.'
+      render()
+      return
+    }
+    state.tasks.push(rowToTask(data))
+  } else {
+    state.tasks.push({
+      id: crypto.randomUUID(),
+      text: text.trim(),
+      done: false
+    })
+  }
+  render()
+}
+
+async function removeTask(id) {
+  if (supabase) {
+    const { error } = await supabase.from('todos').delete().eq('id', id)
+    if (error) {
+      console.error('Failed to delete todo:', error)
+      return
+    }
+  }
   state.tasks = state.tasks.filter(t => t.id !== id)
   render()
 }
 
-function setDone(id, done) {
+async function setDone(id, done) {
+  if (supabase) {
+    const { error } = await supabase.from('todos').update({ done }).eq('id', id)
+    if (error) {
+      console.error('Failed to update todo:', error)
+      return
+    }
+  }
   const task = state.tasks.find(t => t.id === id)
   if (task) task.done = done
   render()
 }
 
-function setTaskText(id, text) {
+async function setTaskText(id, text) {
+  if (!text.trim()) return
+  if (supabase) {
+    const { error } = await supabase.from('todos').update({ text: text.trim() }).eq('id', id)
+    if (error) {
+      console.error('Failed to update todo:', error)
+      return
+    }
+  }
   const task = state.tasks.find(t => t.id === id)
-  if (task && text.trim()) task.text = text.trim()
+  if (task) task.text = text.trim()
   render()
 }
 
@@ -62,8 +127,17 @@ function renderEmptyState(message = 'No tasks yet.') {
 }
 
 function render() {
+  if (errorEl) {
+    errorEl.textContent = state.error || ''
+    errorEl.hidden = !state.error
+  }
   const filtered = getFilteredTasks()
   list.innerHTML = ''
+
+  if (state.loading) {
+    list.appendChild(renderEmptyState('Loading…'))
+    return
+  }
 
   if (filtered.length === 0) {
     const emptyMessage =
@@ -153,5 +227,12 @@ filterButtons.forEach(btn => {
   btn.addEventListener('click', () => setFilter(btn.getAttribute('data-filter')))
 })
 
-// Initial filter UI
+// Initial filter UI and load
 setFilter('all')
+if (supabase) {
+  console.info('[To-Do] Supabase connected – tasks will sync to the database.')
+  loadTasks()
+} else {
+  console.info('[To-Do] Running without Supabase – tasks are stored locally only. Add .env and restart dev server to persist.')
+  render()
+}
