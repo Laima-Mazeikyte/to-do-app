@@ -188,7 +188,18 @@ function createTaskCard(task) {
   const textSpan = document.createElement('span')
   textSpan.className = 'todo-card-text'
   textSpan.textContent = task.text
-  textSpan.addEventListener('dblclick', () => startEdit(card, task))
+  textSpan.setAttribute('role', 'button')
+  textSpan.setAttribute('tabindex', '0')
+  textSpan.setAttribute('aria-label', `Edit task: ${task.text}`)
+  const openEdit = () => startEdit(card, task)
+  textSpan.addEventListener('click', openEdit)
+  textSpan.addEventListener('dblclick', openEdit)
+  textSpan.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault()
+      openEdit()
+    }
+  })
 
   const deleteBtn = document.createElement('button')
   deleteBtn.type = 'button'
@@ -286,34 +297,65 @@ function startEdit(card, task) {
   const textSpan = card.querySelector('.todo-card-text')
   if (!textSpan) return
 
-  const inputEl = document.createElement('input')
-  inputEl.type = 'text'
-  inputEl.className = 'todo-card-edit'
-  inputEl.value = task.text
-  inputEl.setAttribute('aria-label', 'Edit task')
+  const controls = card.querySelector('.todo-card-controls')
+  if (!controls) return
+
+  const inputWrap = document.createElement('div')
+  inputWrap.className = 'todo-card-edit-input-wrap todo-card-edit-input-wrap--multiline'
+  const editField = document.createElement('textarea')
+  editField.className = 'todo-card-edit'
+  editField.value = task.text
+  editField.setAttribute('aria-label', 'Edit task')
+  const lineCount = (task.text.match(/\n/g) || []).length + 1
+  editField.rows = Math.max(10, lineCount)
+  inputWrap.appendChild(editField)
+
+  const saveBtn = document.createElement('button')
+  saveBtn.type = 'button'
+  saveBtn.className = 'todo-card-save'
+  saveBtn.textContent = 'Save'
+  saveBtn.setAttribute('aria-label', 'Save changes')
+
+  const editWrap = document.createElement('div')
+  editWrap.className = 'todo-card-edit-wrap'
+  editWrap.appendChild(inputWrap)
+  editWrap.appendChild(saveBtn)
+
+  controls.replaceChild(editWrap, textSpan)
 
   const finishEdit = () => {
-    setTaskText(task.id, inputEl.value)
-    card.replaceChild(textSpan, inputEl)
-    inputEl.removeEventListener('blur', finishEdit)
-    inputEl.removeEventListener('keydown', keydown)
+    const value = editField.value.trim()
+    if (value) setTaskText(task.id, value)
+    textSpan.textContent = value || task.text
+    controls.replaceChild(textSpan, editWrap)
+    editField.removeEventListener('blur', finishEdit)
+    editField.removeEventListener('keydown', keydown)
+    saveBtn.removeEventListener('click', onSaveClick)
+  }
+
+  const onSaveClick = (e) => {
+    e.preventDefault()
+    finishEdit()
   }
 
   const keydown = (e) => {
-    if (e.key === 'Enter') {
-      e.preventDefault()
-      finishEdit()
-    }
     if (e.key === 'Escape') {
-      inputEl.value = task.text
+      e.preventDefault()
+      editField.value = task.text
+      finishEdit()
+      return
+    }
+    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+      e.preventDefault()
+      e.stopPropagation()
       finishEdit()
     }
   }
 
-  inputEl.addEventListener('blur', finishEdit)
-  inputEl.addEventListener('keydown', keydown)
-  card.replaceChild(inputEl, textSpan)
-  inputEl.focus()
+  editField.addEventListener('blur', finishEdit)
+  editField.addEventListener('keydown', keydown)
+  saveBtn.addEventListener('click', onSaveClick)
+  editField.focus()
 }
 
 form.addEventListener('submit', (e) => {

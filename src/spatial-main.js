@@ -105,7 +105,18 @@ function createCardElement(task) {
   const textSpan = document.createElement('span')
   textSpan.className = 'spatial-card-text'
   textSpan.textContent = task.text
-  textSpan.addEventListener('dblclick', () => startEdit(card, task))
+  textSpan.setAttribute('role', 'button')
+  textSpan.setAttribute('tabindex', '0')
+  textSpan.setAttribute('aria-label', `Edit task: ${task.text}`)
+  const openEdit = () => startEdit(card, task)
+  textSpan.addEventListener('click', openEdit)
+  textSpan.addEventListener('dblclick', openEdit)
+  textSpan.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault()
+      openEdit()
+    }
+  })
 
   controls.appendChild(textSpan)
   inner.appendChild(handle)
@@ -146,7 +157,8 @@ function addCardToWorld(task, x, y) {
   element.style.top = ''
 
   const bodyW = Math.max(CARD_MIN_WIDTH, Math.min(CARD_MAX_WIDTH, w))
-  const bodyH = Math.max(CARD_MIN_HEIGHT, Math.min(CARD_MAX_HEIGHT, h))
+  /* Use actual element height so long/wrapped text gets a body that matches the card visually */
+  const bodyH = Math.max(CARD_MIN_HEIGHT, h)
   const body = createCardBody(x, y, bodyW, bodyH)
   World.add(engine.world, body)
   element.style.left = body.position.x + 'px'
@@ -304,18 +316,65 @@ function removeCard(id) {
 }
 
 function startEdit(cardEl, task) {
+  const entry = cardMap.get(task.id)
+  if (!entry) return
+  const { body } = entry
+
   const textSpan = cardEl.querySelector('.spatial-card-text')
   if (!textSpan) return
-  const inputEl = document.createElement('input')
-  inputEl.type = 'text'
-  inputEl.className = 'spatial-card-edit'
-  inputEl.value = task.text
-  inputEl.setAttribute('aria-label', 'Edit task')
+  const controls = textSpan.parentNode
+  if (!controls) return
+
+  const rect = getStageRect()
+  const savedX = body.position.x
+  const savedY = body.position.y
+  Body.setStatic(body, true)
+  Body.setPosition(body, { x: rect.width / 2, y: rect.height / 2 })
+  Body.setAngle(body, 0)
+
+  const overlay = document.createElement('div')
+  overlay.className = 'spatial-edit-overlay'
+  overlay.setAttribute('aria-hidden', 'true')
+  stageEl.insertBefore(overlay, stageEl.firstChild)
+  cardEl.classList.add('spatial-card--editing')
+
+  const exitEditMode = () => {
+    overlay.remove()
+    cardEl.classList.remove('spatial-card--editing')
+    Body.setPosition(body, { x: savedX, y: savedY })
+    Body.setStatic(body, false)
+  }
+
+  const inputWrap = document.createElement('div')
+  inputWrap.className = 'spatial-card-edit-input-wrap spatial-card-edit-input-wrap--multiline'
+  const editField = document.createElement('textarea')
+  editField.className = 'spatial-card-edit'
+  editField.value = task.text
+  editField.setAttribute('aria-label', 'Edit task')
+  const lineCount = (task.text.match(/\n/g) || []).length + 1
+  editField.rows = Math.max(10, lineCount)
+  inputWrap.appendChild(editField)
+
+  const saveBtn = document.createElement('button')
+  saveBtn.type = 'button'
+  saveBtn.className = 'spatial-card-save'
+  saveBtn.textContent = 'Save'
+  saveBtn.setAttribute('aria-label', 'Save changes')
+
+  const editWrap = document.createElement('div')
+  editWrap.className = 'spatial-card-edit-wrap'
+  editWrap.appendChild(inputWrap)
+  editWrap.appendChild(saveBtn)
+
+  controls.replaceChild(editWrap, textSpan)
+
   const finishEdit = () => {
-    const text = inputEl.value.trim()
-    textSpan.parentNode.replaceChild(textSpan, inputEl)
-    inputEl.removeEventListener('blur', finishEdit)
-    inputEl.removeEventListener('keydown', keydown)
+    const text = editField.value.trim()
+    controls.replaceChild(textSpan, editWrap)
+    editField.removeEventListener('blur', finishEdit)
+    editField.removeEventListener('keydown', keydown)
+    saveBtn.removeEventListener('click', onSaveClick)
+    exitEditMode()
     if (text) {
       apiSetTaskText(task.id, text).then(({ ok }) => {
         if (ok) {
@@ -329,20 +388,30 @@ function startEdit(cardEl, task) {
       textSpan.textContent = task.text
     }
   }
+
+  const onSaveClick = (e) => {
+    e.preventDefault()
+    finishEdit()
+  }
+
   const keydown = (e) => {
-    if (e.key === 'Enter') {
-      e.preventDefault()
-      finishEdit()
-    }
     if (e.key === 'Escape') {
-      inputEl.value = task.text
+      e.preventDefault()
+      editField.value = task.text
+      finishEdit()
+      return
+    }
+    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+      e.preventDefault()
+      e.stopPropagation()
       finishEdit()
     }
   }
-  inputEl.addEventListener('blur', finishEdit)
-  inputEl.addEventListener('keydown', keydown)
-  textSpan.parentNode.replaceChild(inputEl, textSpan)
-  inputEl.focus()
+
+  editField.addEventListener('blur', finishEdit)
+  editField.addEventListener('keydown', keydown)
+  saveBtn.addEventListener('click', onSaveClick)
+  editField.focus()
 }
 
 function spawnCard(task) {

@@ -313,7 +313,28 @@ button:focus-visible {
 .todo-card-text {
   flex: 1;
   min-width: 0;
+  max-width: 200px;
+  text-align: left;
+  white-space: pre-line;
   overflow-wrap: break-word;
+  word-wrap: break-word;
+  line-height: 1.4;
+  cursor: text;
+  border-radius: var(--radius-sm);
+  padding: var(--space-1) 0;
+  outline: none;
+  transition: background-color 0.15s ease;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 5;
+  overflow: hidden;
+}
+.todo-card-text:hover,
+.todo-card-text:focus {
+  background-color: var(--background-muted);
+}
+.todo-card-text:focus {
+  box-shadow: 0 0 0 2px var(--accent-default);
   user-select: none;
 }
 
@@ -323,14 +344,70 @@ button:focus-visible {
   font-size: var(--font-size-sm);
 }
 
-.todo-card-edit {
+.todo-card-edit-wrap {
   flex: 1;
   min-width: 0;
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+}
+
+.todo-card-edit-input-wrap {
+  display: inline-block;
+  position: relative;
+  min-width: 3rem;
+}
+.todo-card-edit-input-wrap.todo-card-edit-input-wrap--multiline {
+  min-width: 200px;
+  max-width: 200px;
+}
+
+.todo-card-edit-mirror {
+  visibility: hidden;
+  position: absolute;
+  left: 0;
+  top: 0;
+  white-space: pre;
+  font: inherit;
+  font-family: inherit;
+  font-size: inherit;
+  padding: var(--space-1) var(--space-2);
+  box-sizing: border-box;
+  pointer-events: none;
+  max-width: none;
+}
+
+.todo-card-edit {
+  display: block;
+  min-width: 3rem;
   padding: var(--space-1) var(--space-2);
   font-size: inherit;
   font-family: inherit;
+  text-align: left;
   border-radius: var(--radius-sm);
   border: 1px solid var(--accent-default);
+  box-sizing: border-box;
+}
+textarea.todo-card-edit {
+  width: 200px;
+  min-height: 2.5em;
+  resize: vertical;
+  line-height: 1.4;
+}
+
+.todo-card-save {
+  flex-shrink: 0;
+  padding: var(--space-1) var(--space-2);
+  font-size: var(--font-size-sm);
+  border-radius: var(--radius-sm);
+  background-color: var(--accent-default);
+  color: white;
+  border: none;
+  cursor: pointer;
+  font-weight: 500;
+}
+.todo-card-save:hover {
+  background-color: var(--accent-emphasis);
 }
 
 /* Undo bar */
