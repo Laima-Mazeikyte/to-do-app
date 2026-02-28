@@ -1,5 +1,6 @@
 .env
 .temp
+.pnpm-store
 
 # Logs
 logs

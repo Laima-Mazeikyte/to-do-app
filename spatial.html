@@ -24,6 +24,7 @@
           />
           <button type="submit" id="spatial-todo-submit" class="spatial-submit">Add</button>
         </form>
+        <button type="button" id="spatial-paste-todos-btn" class="spatial-paste-todos-btn">Paste todos</button>
         <div id="spatial-error" class="spatial-error" role="alert" hidden></div>
       </header>
       <div id="spatial-stage" class="spatial-stage" aria-live="polite">
@@ -35,6 +36,23 @@
           <span class="spatial-drop-zone-label">Drag to delete</span>
         </div>
       </div>
+      <div id="spatial-paste-drawer-backdrop" class="spatial-drawer-backdrop" aria-hidden="true" hidden></div>
+      <aside id="spatial-paste-drawer" class="spatial-drawer" role="dialog" aria-modal="true" aria-labelledby="spatial-paste-drawer-title" hidden>
+        <h2 id="spatial-paste-drawer-title" class="spatial-drawer-title">Paste todos</h2>
+        <p class="spatial-drawer-hint">Paste your list here… One line per task. Bullets, numbers, and [ ] are stripped. Long lines become long cards (truncated in view).</p>
+        <textarea
+          id="spatial-paste-drawer-textarea"
+          class="spatial-drawer-textarea"
+          placeholder="Paste your list here…"
+          aria-label="Pasted list (one line per task)"
+          rows="12"
+       ></textarea>
+        <div id="spatial-paste-drawer-empty" class="spatial-drawer-empty" role="alert" hidden>No tasks to add.</div>
+        <div class="spatial-drawer-actions">
+          <button type="button" id="spatial-paste-drawer-create" class="spatial-drawer-btn spatial-drawer-btn--primary">Create cards</button>
+          <button type="button" id="spatial-paste-drawer-cancel" class="spatial-drawer-btn spatial-drawer-btn--secondary">Cancel</button>
+        </div>
+      </aside>
     </div>
     <script type="module" src="/src/spatial-main.js"></script>
   </body>

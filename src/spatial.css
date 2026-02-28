@@ -314,3 +314,125 @@ textarea.spatial-card-edit {
 .spatial-card-save:hover {
   background-color: var(--accent-emphasis);
 }
+
+/* Paste todos drawer */
+.spatial-paste-todos-btn {
+  flex-shrink: 0;
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-default);
+  background: var(--background-default);
+  color: var(--foreground-default);
+  font-size: var(--font-size-base);
+  font-weight: 500;
+  cursor: pointer;
+}
+.spatial-paste-todos-btn:hover {
+  background: var(--background-muted);
+  color: var(--foreground-default);
+}
+
+.spatial-drawer-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  z-index: 100;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  cursor: pointer;
+}
+.spatial-drawer-backdrop.is-open {
+  opacity: 1;
+}
+
+.spatial-drawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: min(400px, 100vw - var(--space-8));
+  max-width: 100%;
+  height: 100%;
+  background: var(--background-default);
+  border-left: 1px solid var(--border-default);
+  box-shadow: -4px 0 24px rgba(0, 0, 0, 0.12);
+  z-index: 101;
+  display: flex;
+  flex-direction: column;
+  padding: var(--space-6);
+  gap: var(--space-4);
+  transform: translateX(100%);
+  transition: transform 0.25s ease;
+  overflow: auto;
+}
+.spatial-drawer.is-open {
+  transform: translateX(0);
+}
+
+.spatial-drawer-title {
+  margin: 0;
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+  color: var(--foreground-default);
+}
+
+.spatial-drawer-hint {
+  margin: 0;
+  font-size: var(--font-size-sm);
+  color: var(--foreground-muted);
+  line-height: 1.4;
+}
+
+.spatial-drawer-textarea {
+  flex: 1;
+  min-height: 160px;
+  padding: var(--space-3);
+  font-size: var(--font-size-base);
+  font-family: inherit;
+  line-height: 1.5;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-default);
+  background: var(--background-default);
+  color: var(--foreground-default);
+  resize: vertical;
+  box-sizing: border-box;
+}
+.spatial-drawer-textarea:focus {
+  outline: 2px solid var(--accent-default);
+  outline-offset: 2px;
+}
+
+.spatial-drawer-empty {
+  font-size: var(--font-size-sm);
+  color: var(--foreground-muted);
+}
+
+.spatial-drawer-actions {
+  display: flex;
+  gap: var(--space-2);
+  flex-shrink: 0;
+}
+
+.spatial-drawer-btn {
+  padding: var(--space-2) var(--space-4);
+  font-size: var(--font-size-base);
+  font-weight: 500;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  border: 1px solid transparent;
+}
+.spatial-drawer-btn--primary {
+  background: var(--accent-default);
+  color: white;
+  border-color: var(--accent-default);
+}
+.spatial-drawer-btn--primary:hover {
+  background: var(--accent-emphasis);
+}
+.spatial-drawer-btn--secondary {
+  background: var(--background-default);
+  color: var(--foreground-default);
+  border-color: var(--border-default);
+}
+.spatial-drawer-btn--secondary:hover {
+  background: var(--background-muted);
+}

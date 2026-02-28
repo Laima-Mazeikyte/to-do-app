@@ -9,6 +9,7 @@ import {
   setTaskText as apiSetTaskText
 } from './todo-api.js'
 import { supabase } from './supabase.js'
+import { parsePastedList } from './paste-list-parser.js'
 
 const Engine = Matter.Engine
 const World = Matter.World
@@ -23,6 +24,15 @@ const stageEl = document.getElementById('spatial-stage')
 const zoneDoneEl = document.getElementById('spatial-zone-done')
 const zoneDeleteEl = document.getElementById('spatial-zone-delete')
 const doneCountEl = document.getElementById('spatial-done-count')
+const pasteTodosBtn = document.getElementById('spatial-paste-todos-btn')
+const pasteDrawerBackdrop = document.getElementById('spatial-paste-drawer-backdrop')
+const pasteDrawer = document.getElementById('spatial-paste-drawer')
+const pasteDrawerTextarea = document.getElementById('spatial-paste-drawer-textarea')
+const pasteDrawerEmpty = document.getElementById('spatial-paste-drawer-empty')
+const pasteDrawerCreate = document.getElementById('spatial-paste-drawer-create')
+const pasteDrawerCancel = document.getElementById('spatial-paste-drawer-cancel')
+
+const DRAWER_FOCUSABLE = 'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
 
 const CARD_MIN_WIDTH = 100
 const CARD_MAX_WIDTH = 320
@@ -442,6 +452,92 @@ async function onAddTask(text) {
   spawnCard(task)
 }
 
+function openPasteDrawer() {
+  pasteDrawerBackdrop.hidden = false
+  pasteDrawer.hidden = false
+  pasteDrawerBackdrop.setAttribute('aria-hidden', 'false')
+  pasteDrawer.setAttribute('aria-hidden', 'false')
+  pasteDrawerTextarea.value = ''
+  if (pasteDrawerEmpty) pasteDrawerEmpty.hidden = true
+  document.body.addEventListener('keydown', onDrawerKeydown)
+  requestAnimationFrame(() => {
+    pasteDrawerBackdrop.classList.add('is-open')
+    pasteDrawer.classList.add('is-open')
+    pasteDrawerTextarea.focus()
+  })
+}
+
+function closePasteDrawer() {
+  pasteDrawerBackdrop.classList.remove('is-open')
+  pasteDrawer.classList.remove('is-open')
+  const onTransitionEnd = () => {
+    pasteDrawer.removeEventListener('transitionend', onTransitionEnd)
+    pasteDrawerBackdrop.hidden = true
+    pasteDrawer.hidden = true
+    pasteDrawerBackdrop.setAttribute('aria-hidden', 'true')
+    pasteDrawer.setAttribute('aria-hidden', 'true')
+    document.body.removeEventListener('keydown', onDrawerKeydown)
+  }
+  pasteDrawer.addEventListener('transitionend', onTransitionEnd)
+}
+
+function onDrawerKeydown(e) {
+  if (e.key !== 'Escape') return
+  e.preventDefault()
+  closePasteDrawer()
+}
+
+function getDrawerFocusables() {
+  return [...pasteDrawer.querySelectorAll(DRAWER_FOCUSABLE)].filter(
+    (el) => !el.hidden && el.getAttribute('tabindex') !== '-1'
+  )
+}
+
+function trapDrawerFocus(e) {
+  if (e.key !== 'Tab') return
+  const focusables = getDrawerFocusables()
+  if (focusables.length === 0) return
+  const first = focusables[0]
+  const last = focusables[focusables.length - 1]
+  if (e.shiftKey) {
+    if (document.activeElement === first) {
+      e.preventDefault()
+      last.focus()
+    }
+  } else {
+    if (document.activeElement === last) {
+      e.preventDefault()
+      first.focus()
+    }
+  }
+}
+
+async function onCreateCardsFromPaste() {
+  const raw = pasteDrawerTextarea.value
+  const items = parsePastedList(raw)
+  if (items.length === 0) {
+    if (pasteDrawerEmpty) {
+      pasteDrawerEmpty.hidden = false
+      pasteDrawerEmpty.textContent = 'No tasks to add.'
+    }
+    return
+  }
+  closePasteDrawer()
+  const rect = getStageRect()
+  const centerX = rect.width / 2
+  for (let i = 0; i < items.length; i++) {
+    const { data: task, error } = await apiAddTask(items[i])
+    if (error) {
+      showError(error)
+      continue
+    }
+    if (!task) continue
+    state.tasks.push(task)
+    const x = centerX + (Math.random() - 0.5) * 60
+    setTimeout(() => addCardToWorld(task, x, SPAWN_Y), i * 120)
+  }
+}
+
 async function loadInitialTasks() {
   state.loading = true
   const { data, error } = await apiLoadTasks()
@@ -465,6 +561,22 @@ form.addEventListener('submit', (e) => {
   input.value = ''
   input.focus()
 })
+
+if (pasteTodosBtn) {
+  pasteTodosBtn.addEventListener('click', () => openPasteDrawer())
+}
+if (pasteDrawerBackdrop) {
+  pasteDrawerBackdrop.addEventListener('click', () => closePasteDrawer())
+}
+if (pasteDrawerCancel) {
+  pasteDrawerCancel.addEventListener('click', () => closePasteDrawer())
+}
+if (pasteDrawerCreate) {
+  pasteDrawerCreate.addEventListener('click', () => onCreateCardsFromPaste())
+}
+if (pasteDrawer) {
+  pasteDrawer.addEventListener('keydown', trapDrawerFocus)
+}
 
 function handleResize() {
   const rect = getStageRect()
