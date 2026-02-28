@@ -1,4 +1,4 @@
-/* Spatial view: physics stage and cards */
+/* Spatial view: physics stage and cards. Token reference and component map: see docs/STYLE.md */
 @import "./tokens.css";
 
 #app.spatial-app {
