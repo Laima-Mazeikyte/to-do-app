@@ -26,15 +26,14 @@ A spatial, habit-builder and todo list
 
 Base features
 - CRUD Operations: Create, Read, Update, Delete.
-- State Persistence: Using localStorage so data survives a page refresh.
+- State Persistence: Using Supabase and local storage (depending on the type of thing) so data survives a page refresh.
 - Toggle State: A simple boolean isDone to flip tasks back and forth.
 
 Features afterwards
 - People can create a task/todo/goal. It appear as a "card" that falls down into a pile (Physics-based UI).
 - People can drag the tasks around and clip/pin them up top
-    - Peaople can clip/drag them into a "Today" zone at the top or leave them piled up on the bottom
+    - Peaple can clip/drag them into a "Prioriy" zone at the top or leave them piled up on the bottom
 - Let people paste a simple list copied from other apps (notes, notion etc) place and create todo cards according to the list
-- Spatial UI (Physics): Instead of a rigid list, tasks are div elements with basic drag-and-drop (using a library like SortableJS or simple CSS transitions).
 
 Not MVP
 - People can have multiple pages for different categories of tasks (not MVP)

@@ -1,0 +1,229 @@
+/* Spatial view: physics stage and cards */
+@import "./tokens.css";
+
+#app.spatial-app {
+  max-width: none;
+  width: 100%;
+  padding: 0;
+}
+
+.spatial-app {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  margin: 0;
+  background: var(--background-subtle);
+  color: var(--foreground-default);
+}
+
+.spatial-header {
+  flex-shrink: 0;
+  padding: var(--space-4);
+  background: var(--background-default);
+  border-bottom: 1px solid var(--border-default);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+}
+
+.spatial-drop-zone {
+  position: absolute;
+  top: var(--space-4);
+  padding: var(--space-5) var(--space-6);
+  border-radius: var(--radius-lg);
+  border: 3px dashed var(--border-default);
+  font-size: var(--font-size-base);
+  color: var(--foreground-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+  min-height: 64px;
+  min-width: 160px;
+  max-width: 220px;
+  pointer-events: none;
+}
+
+.spatial-drop-zone--done {
+  left: var(--space-4);
+}
+
+.spatial-drop-zone--delete {
+  right: var(--space-4);
+}
+
+.spatial-drop-zone--done {
+  border-color: var(--success-default);
+  color: var(--success-emphasis);
+  background: color-mix(in srgb, var(--success-default) 8%, transparent);
+}
+
+.spatial-drop-zone--delete {
+  border-color: var(--danger-default);
+  color: var(--danger-emphasis);
+  background: color-mix(in srgb, var(--danger-default) 8%, transparent);
+}
+
+.spatial-drop-zone-count {
+  font-weight: 700;
+  color: inherit;
+}
+
+.spatial-form {
+  display: flex;
+  gap: var(--space-2);
+  align-items: center;
+  flex: 1;
+  min-width: 0;
+  max-width: 28rem;
+}
+
+.spatial-nav-link {
+  font-weight: 500;
+  color: var(--accent-default);
+  text-decoration: none;
+}
+.spatial-nav-link:hover {
+  color: var(--accent-emphasis);
+}
+
+.spatial-input {
+  flex: 1;
+  min-width: 0;
+  padding: var(--space-2) var(--space-3);
+  font-size: var(--font-size-base);
+  font-family: inherit;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-default);
+  background: var(--background-default);
+  color: var(--foreground-default);
+}
+.spatial-input:focus {
+  outline: 2px solid var(--accent-default);
+  outline-offset: var(--space-1);
+}
+
+.spatial-submit {
+  flex-shrink: 0;
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-default);
+  background: var(--accent-default);
+  color: white;
+  font-weight: 500;
+  cursor: pointer;
+}
+.spatial-submit:hover {
+  background: var(--accent-emphasis);
+}
+
+.spatial-error {
+  width: 100%;
+  padding: var(--space-2) var(--space-3);
+  font-size: var(--font-size-sm);
+  color: var(--danger-default);
+}
+
+.spatial-stage {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+  min-height: 0;
+}
+
+.spatial-card {
+  position: absolute;
+  left: 0;
+  top: 0;
+  display: flex;
+  align-items: stretch;
+  box-sizing: border-box;
+  padding: 0;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-default);
+  background: var(--background-default);
+  color: var(--foreground-default);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  pointer-events: auto;
+  transition: box-shadow 0.15s ease, background-color 0.15s ease;
+  min-width: 100px;
+  max-width: 320px;
+  width: max-content;
+  min-height: 56px;
+}
+
+/* Dragging over "mark as done" zone: pulsate + green tint */
+.spatial-card--over-done {
+  background: color-mix(in srgb, var(--success-default) 22%, var(--background-default));
+  box-shadow: 0 2px 12px color-mix(in srgb, var(--success-default) 35%, transparent);
+}
+
+/* Dragging over "delete" zone */
+.spatial-card--over-delete {
+  box-shadow: 0 2px 12px color-mix(in srgb, var(--danger-default) 35%, transparent);
+}
+
+.spatial-card-inner {
+  display: flex;
+  align-items: stretch;
+  flex: 1;
+  min-width: 0;
+  border-radius: inherit;
+}
+
+.spatial-card-handle {
+  flex-shrink: 0;
+  width: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: grab;
+  color: var(--foreground-muted);
+  font-size: 0.9rem;
+  user-select: none;
+  border-right: 1px solid var(--border-default);
+  padding: 0 var(--space-2);
+}
+.spatial-card-handle:active {
+  cursor: grabbing;
+}
+
+.spatial-card-controls {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-width: 0;
+  padding: var(--space-2) var(--space-3);
+  overflow: hidden;
+}
+
+.spatial-card-text {
+  flex: 1;
+  min-width: 0;
+  text-align: left;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+  white-space: normal;
+  user-select: none;
+  line-height: 1.4;
+}
+
+.spatial-card--done .spatial-card-text {
+  text-decoration: line-through;
+  color: var(--foreground-muted);
+}
+
+.spatial-card-edit {
+  flex: 1;
+  min-width: 0;
+  padding: var(--space-1) var(--space-2);
+  font-size: inherit;
+  font-family: inherit;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--accent-default);
+  background: var(--background-default);
+  color: var(--foreground-default);
+}

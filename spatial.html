@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>To-Do – Spatial view</title>
+  </head>
+  <body>
+    <div id="app" class="spatial-app">
+      <header class="spatial-header">
+        <nav class="spatial-nav" aria-label="View switch">
+          <a href="index.html" class="spatial-nav-link">List view</a>
+        </nav>
+        <form id="spatial-todo-form" class="spatial-form" aria-label="Add new task">
+          <label for="spatial-todo-input" class="sr-only">New task</label>
+          <input
+            id="spatial-todo-input"
+            class="spatial-input"
+            type="text"
+            name="task"
+            autocomplete="off"
+            placeholder="Add a task…"
+          />
+          <button type="submit" id="spatial-todo-submit" class="spatial-submit">Add</button>
+        </form>
+        <div id="spatial-error" class="spatial-error" role="alert" hidden></div>
+      </header>
+      <div id="spatial-stage" class="spatial-stage" aria-live="polite">
+        <div id="spatial-zone-done" class="spatial-drop-zone spatial-drop-zone--done" aria-label="Drop here to mark as done">
+          <span class="spatial-drop-zone-label">Drag to mark as done</span>
+          <span id="spatial-done-count" class="spatial-drop-zone-count" aria-live="polite">0</span>
+        </div>
+        <div id="spatial-zone-delete" class="spatial-drop-zone spatial-drop-zone--delete" aria-label="Drop here to delete">
+          <span class="spatial-drop-zone-label">Drag to delete</span>
+        </div>
+      </div>
+    </div>
+    <script type="module" src="/src/spatial-main.js"></script>
+  </body>
+</html>

@@ -11,6 +11,9 @@
       <section class="todo-app" aria-label="To-Do application">
         <header class="todo-header">
           <h1 class="todo-title">To-Do</h1>
+          <nav class="todo-nav" aria-label="View switch">
+            <a href="spatial.html" class="todo-nav-link">Spatial view</a>
+          </nav>
         </header>
 
         <form id="todo-form" class="todo-form" aria-label="Add new task">
@@ -27,9 +30,25 @@
 
         <div id="todo-error" class="todo-error" role="alert" hidden></div>
 
-        <ul id="todo-list" class="todo-list" aria-label="Task list">
-          <li class="todo-list-empty" aria-live="polite">No tasks yet.</li>
-        </ul>
+        <div class="todo-zones">
+          <div class="todo-zone">
+            <h2 class="todo-zone-title">Priority</h2>
+            <ul id="todo-priority-list" class="todo-list" aria-label="Priority tasks"></ul>
+          </div>
+          <div class="todo-zone">
+            <h2 class="todo-zone-title">To do</h2>
+            <ul id="todo-pile-list" class="todo-list" aria-label="Tasks to do"></ul>
+          </div>
+          <div class="todo-zone">
+            <h2 class="todo-zone-title">Done <span id="todo-done-count" aria-live="polite">0</span></h2>
+            <ul id="todo-done-list" class="todo-list" aria-label="Done tasks"></ul>
+          </div>
+        </div>
+
+        <div id="todo-undo" class="todo-undo" hidden role="status">
+          <span id="todo-undo-text"></span>
+          <button type="button" id="todo-undo-button" class="todo-undo-button">Undo</button>
+        </div>
       </section>
     </div>
     <script type="module" src="/src/main.js"></script>
