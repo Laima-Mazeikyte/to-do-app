@@ -539,6 +539,13 @@ export function initSpatialView(supabase) {
   }
 
   async function loadInitialTasks() {
+    if (engine) {
+      for (const [, { body, element }] of cardMap) {
+        World.remove(engine.world, body)
+        element.remove()
+      }
+      cardMap.clear()
+    }
     state.loading = true
     const { data, error } = await apiLoadTasks()
     if (error) {
@@ -601,4 +608,6 @@ export function initSpatialView(supabase) {
       console.info('[To-Do Spatial] No Supabase – add .env and restart to persist.')
     }
   })
+
+  return { reloadTasks: loadInitialTasks }
 }

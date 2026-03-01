@@ -21,9 +21,16 @@ export async function loadTasks() {
   if (!supabase) {
     return { data: [], error: null }
   }
+  const {
+    data: { user }
+  } = await supabase.auth.getUser()
+  if (!user) {
+    return { data: [], error: 'Not authenticated. Ensure session before loading todos.' }
+  }
   const { data, error } = await supabase
     .from('todos')
     .select('*')
+    .eq('user_id', user.id)
     .order('created_at', { ascending: true })
   if (error) {
     console.error('Failed to load todos:', error)

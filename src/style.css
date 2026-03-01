@@ -435,3 +435,217 @@ textarea.todo-card-edit {
   padding: var(--space-1) var(--space-2);
   font-size: var(--font-size-sm);
 }
+
+/* Auth header (list + spatial) */
+.todo-auth-header,
+.spatial-auth-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-left: auto;
+}
+
+.auth-header-btn,
+.auth-header-signout {
+  font-size: var(--font-size-sm);
+}
+
+.auth-header-email {
+  font-size: var(--font-size-sm);
+  color: var(--foreground-muted);
+  max-width: 12rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Auth modal – hidden until user clicks "Sign in" */
+.auth-modal-backdrop[hidden] {
+  display: none !important;
+}
+
+.auth-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: stretch;
+  background-color: var(--background-default);
+  box-sizing: border-box;
+}
+
+.auth-modal {
+  flex: 1;
+  width: 100%;
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  padding: var(--space-6);
+  padding-top: var(--space-4);
+  text-align: left;
+  overflow: auto;
+}
+
+.auth-modal-choice {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.auth-modal-form-wrap {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  max-width: 22rem;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.auth-modal-form-wrap[hidden] {
+  display: none;
+}
+
+.auth-modal-choice-screen[hidden] {
+  display: none;
+}
+
+.auth-modal-choice-screen {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  max-width: 22rem;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.auth-modal-choice-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+}
+
+.auth-modal-close {
+  flex-shrink: 0;
+  padding: var(--space-2) var(--space-3);
+  font-size: var(--font-size-xl);
+  line-height: 1;
+  background: none;
+  border: none;
+  color: var(--foreground-muted);
+  cursor: pointer;
+}
+
+.auth-modal-close:hover {
+  color: var(--foreground-default);
+}
+
+.auth-modal-close:focus-visible {
+  outline: 2px solid var(--accent-default);
+  outline-offset: var(--space-1);
+}
+
+.auth-modal-back {
+  align-self: flex-start;
+  margin-bottom: var(--space-4);
+  padding: var(--space-2) var(--space-3);
+  font-size: var(--font-size-lg);
+  line-height: 1;
+  background: none;
+  border: none;
+  color: var(--foreground-default);
+  cursor: pointer;
+}
+
+.auth-modal-back:hover {
+  color: var(--accent-default);
+  border-color: transparent;
+}
+
+.auth-modal-back:focus-visible {
+  outline: 2px solid var(--accent-default);
+  outline-offset: var(--space-1);
+}
+
+.auth-modal-title {
+  margin: 0;
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+}
+
+.auth-modal-choice-btn {
+  width: 100%;
+  padding: var(--space-3);
+  font-size: var(--font-size-base);
+}
+
+.auth-modal-form-wrap {
+  margin-top: var(--space-2);
+}
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.auth-form-label {
+  display: block;
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  color: var(--foreground-default);
+}
+
+.auth-form-input {
+  width: 100%;
+  padding: var(--space-2) var(--space-3);
+  font-size: var(--font-size-base);
+  font-family: inherit;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-default);
+  background-color: var(--background-default);
+  color: var(--foreground-default);
+  box-sizing: border-box;
+}
+
+.auth-form-input:focus {
+  outline: 2px solid var(--accent-default);
+  outline-offset: var(--space-1);
+}
+
+.auth-form-error {
+  font-size: var(--font-size-sm);
+  color: var(--danger-default);
+}
+
+.auth-form-actions {
+  display: flex;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+}
+
+.auth-form-submit {
+  flex: 1;
+  background-color: var(--accent-default);
+  color: white;
+  border-color: var(--accent-default);
+}
+
+.auth-form-submit:hover {
+  background-color: var(--accent-emphasis);
+  border-color: var(--accent-emphasis);
+}
+
+.auth-form-submit:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+body.auth-modal-open {
+  overflow: hidden;
+}

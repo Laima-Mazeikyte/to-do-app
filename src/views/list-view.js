@@ -420,4 +420,6 @@ export function initListView(supabase) {
     )
     render()
   }
+
+  return { reloadTasks: loadTasks }
 }

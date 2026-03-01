@@ -13,3 +13,22 @@ if (!hasEnv && import.meta.env.DEV) {
 }
 
 export const supabase = hasEnv ? createClient(url, anonKey) : null
+
+/**
+ * Ensures a Supabase auth session exists. Uses existing session if present,
+ * otherwise signs in anonymously. Call this before loading/saving user data.
+ * @returns {Promise<import('@supabase/supabase-js').User | null>} Current user or null if no client or auth failed.
+ */
+export async function ensureSession() {
+  if (!supabase) return null
+  const {
+    data: { session }
+  } = await supabase.auth.getSession()
+  if (session?.user) return session.user
+  const { data, error } = await supabase.auth.signInAnonymously()
+  if (error) {
+    console.error('[Supabase] Anonymous sign-in failed:', error)
+    return null
+  }
+  return data?.user ?? null
+}
