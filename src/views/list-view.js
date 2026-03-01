@@ -10,7 +10,9 @@ import {
   updateTask,
   addPendingDelete,
   removePendingDelete,
-  getPendingDeletes
+  getPendingDeletes,
+  reorderTaskToDoneTop,
+  setActiveTaskOrder
 } from '../lib/state.js'
 import {
   loadTasks as apiLoadTasks,
@@ -31,13 +33,9 @@ function getElements() {
     form: document.getElementById('todo-form'),
     input: document.getElementById('todo-input'),
     errorEl: document.getElementById('todo-error'),
-    priorityList: document.getElementById('todo-priority-list'),
-    pileList: document.getElementById('todo-pile-list'),
+    activeList: document.getElementById('todo-active-list'),
     doneList: document.getElementById('todo-done-list'),
-    doneCountEl: document.getElementById('todo-done-count'),
-    undoEl: document.getElementById('todo-undo'),
-    undoTextEl: document.getElementById('todo-undo-text'),
-    undoButton: document.getElementById('todo-undo-button')
+    doneCountEl: document.getElementById('todo-done-count')
   }
 }
 
@@ -46,17 +44,6 @@ function renderZoneEmptyState(message) {
   empty.className = 'todo-zone-empty'
   empty.textContent = message
   return empty
-}
-
-function resetUndoUI(el) {
-  const pendingDeletes = getPendingDeletes()
-  if (pendingDeletes.size === 0) {
-    el.undoEl.hidden = true
-    return
-  }
-  const lastPending = Array.from(pendingDeletes.values()).at(-1)
-  el.undoTextEl.textContent = `"${lastPending.task.text}" moved to trash.`
-  el.undoEl.hidden = false
 }
 
 async function removeTaskPermanent(id) {
@@ -68,16 +55,37 @@ async function removeTaskPermanent(id) {
   return ok
 }
 
-function createTaskCard(task, onSetDone, onQueueDelete, onStartEdit) {
+function createTaskCard(task, onSetDone, onQueueDelete, onStartEdit, onUndoDelete) {
   const state = getState()
+  const isPendingDelete = getPendingDeletes().has(task.id)
+
   const card = document.createElement('article')
   card.className = 'todo-card'
   card.dataset.id = task.id
-  card.draggable = true
+  card.draggable = !isPendingDelete
   if (task.done) card.classList.add('todo-card--done')
   if (task.pinned) card.classList.add('todo-card--pinned')
-  if (state.lastAddedTaskId === task.id && !task.done && !task.pinned) {
+  if (state.lastAddedTaskId === task.id && !task.done && !task.pinned && !isPendingDelete) {
     card.classList.add('todo-card--spawn')
+  }
+
+  if (isPendingDelete) {
+    card.classList.add('todo-card--pending-delete')
+    const wrap = document.createElement('div')
+    wrap.className = 'todo-card-undo-wrap'
+    const msg = document.createElement('span')
+    msg.className = 'todo-card-undo-msg'
+    msg.textContent = `"${task.text}" moved to trash.`
+    const undoBtn = document.createElement('button')
+    undoBtn.type = 'button'
+    undoBtn.className = 'todo-card-undo'
+    undoBtn.textContent = 'Undo'
+    undoBtn.setAttribute('aria-label', `Undo delete "${task.text}"`)
+    undoBtn.addEventListener('click', () => onUndoDelete(task.id))
+    wrap.appendChild(msg)
+    wrap.appendChild(undoBtn)
+    card.appendChild(wrap)
+    return card
   }
 
   const controls = document.createElement('div')
@@ -139,6 +147,13 @@ export function initListView(supabase) {
       return
     }
     setTasks(data)
+    const state = getState()
+    const active = state.tasks.filter((t) => !t.done)
+    const done = state.tasks.filter((t) => t.done)
+    const createdAt = (t) => t.created_at || ''
+    const sortedActive = [...active].sort((a, b) => (createdAt(b) > createdAt(a) ? 1 : -1))
+    const sortedDone = [...done].sort((a, b) => (createdAt(a) > createdAt(b) ? 1 : -1))
+    setTasks([...sortedActive, ...sortedDone])
     setLoading(false)
     render()
   }
@@ -153,6 +168,10 @@ export function initListView(supabase) {
     if (!nextTask) return
     setError(null)
     stateAddTask(nextTask)
+    const s = getState()
+    const active = s.tasks.filter((t) => !t.done)
+    const done = s.tasks.filter((t) => t.done)
+    setTasks([nextTask, ...active.filter((t) => t.id !== nextTask.id), ...done])
     setLastAddedTaskId(nextTask.id)
     render()
   }
@@ -165,6 +184,7 @@ export function initListView(supabase) {
       return false
     }
     updateTask(id, { done })
+    if (done) reorderTaskToDoneTop(id)
     render()
     return true
   }
@@ -193,14 +213,15 @@ export function initListView(supabase) {
     const pending = pendingDeletes.get(id)
     if (!pending) return
 
+    window.clearTimeout(pending.timerId)
     removePendingDelete(id)
+    removeTaskById(id)
     const didDelete = await removeTaskPermanent(id)
 
     if (!didDelete) {
       stateAddTask(pending.task)
     }
 
-    resetUndoUI(el)
     render()
   }
 
@@ -215,24 +236,20 @@ export function initListView(supabase) {
     }, DELETE_UNDO_MS)
 
     addPendingDelete(id, { task, timerId })
-    removeTaskById(id)
-    resetUndoUI(el)
     render()
   }
 
-  function undoLastDelete() {
+  function undoDelete(id) {
     const pendingDeletes = getPendingDeletes()
-    const entries = Array.from(pendingDeletes.entries())
-    if (entries.length === 0) return
-    const [taskId, pending] = entries[entries.length - 1]
+    const pending = pendingDeletes.get(id)
+    if (!pending) return
+
     window.clearTimeout(pending.timerId)
-    removePendingDelete(taskId)
-    stateAddTask(pending.task)
-    resetUndoUI(el)
+    removePendingDelete(id)
     render()
   }
 
-  async function handleDropToZone(taskId, zone) {
+  async function handleDropToZone(taskId, zone, dropTarget) {
     const state = getState()
     const task = state.tasks.find((item) => item.id === taskId)
     if (!task) return
@@ -253,9 +270,23 @@ export function initListView(supabase) {
       return
     }
 
-    if (zone === 'pile') {
+    if (zone === 'pile' || zone === 'active') {
       if (task.done) await setDone(task.id, false)
       if (task.pinned) await setPinned(task.id, false)
+      const targetId = dropTarget?.dataset?.id
+      if (targetId && taskId !== targetId) {
+        const current = getState()
+        const active = current.tasks.filter((t) => !t.done).map((t) => t.id)
+        const fromIdx = active.indexOf(taskId)
+        const toIdx = active.indexOf(targetId)
+        if (fromIdx !== -1 && toIdx !== -1) {
+          const reordered = [...active]
+          reordered.splice(fromIdx, 1)
+          reordered.splice(toIdx, 0, taskId)
+          setActiveTaskOrder(reordered)
+          render()
+        }
+      }
     }
   }
 
@@ -329,40 +360,33 @@ export function initListView(supabase) {
     el.errorEl.textContent = state.error || ''
     el.errorEl.hidden = !state.error
 
-    el.priorityList.innerHTML = ''
-    el.pileList.innerHTML = ''
+    el.activeList.innerHTML = ''
     el.doneList.innerHTML = ''
 
     if (state.loading) {
-      el.pileList.appendChild(renderZoneEmptyState('Loading...'))
+      el.activeList.appendChild(renderZoneEmptyState('Loading...'))
       el.doneCountEl.textContent = '0'
       return
     }
 
-    const doneCount = state.tasks.filter((task) => task.done).length
-    el.doneCountEl.textContent = `${doneCount}`
+    const activeTasks = state.tasks.filter((t) => !t.done)
+    const doneTasks = state.tasks.filter((t) => t.done)
+    el.doneCountEl.textContent = `${doneTasks.length}`
 
-    state.tasks.forEach((task) => {
-      const card = createTaskCard(task, setDone, queueDeleteTask, startEdit)
-      if (task.done) {
-        el.doneList.appendChild(card)
-        return
-      }
-      if (task.pinned) {
-        el.priorityList.appendChild(card)
-        return
-      }
-      el.pileList.appendChild(card)
+    activeTasks.forEach((task) => {
+      const card = createTaskCard(task, setDone, queueDeleteTask, startEdit, undoDelete)
+      el.activeList.appendChild(card)
+    })
+    doneTasks.forEach((task) => {
+      const card = createTaskCard(task, setDone, queueDeleteTask, startEdit, undoDelete)
+      el.doneList.appendChild(card)
     })
 
-    if (!el.priorityList.children.length) {
-      el.priorityList.appendChild(renderZoneEmptyState('Drag cards here to pin for today.'))
-    }
-    if (!el.pileList.children.length) {
-      el.pileList.appendChild(renderZoneEmptyState('Create a task and it will land here.'))
+    if (!el.activeList.children.length) {
+      el.activeList.appendChild(renderZoneEmptyState('Create a task above to get started.'))
     }
     if (!el.doneList.children.length) {
-      el.doneList.appendChild(renderZoneEmptyState('Drop a card here or tick the checkbox.'))
+      el.doneList.appendChild(renderZoneEmptyState('Complete tasks to see them here.'))
     }
 
     clearLastAddedTaskId()
@@ -384,8 +408,6 @@ export function initListView(supabase) {
     el.input.value = ''
     el.input.focus()
   })
-
-  el.undoButton.addEventListener('click', undoLastDelete)
 
   ensureSpatialDnd()
 

@@ -81,9 +81,9 @@ button:focus-visible {
 
 /* Todo app */
 .todo-app {
-  width: var(--layout-content-max);
+  width: 100%;
   min-width: var(--layout-content-min);
-  max-width: min(100%, 95vw);
+  max-width: var(--layout-app-max);
   margin: 0 auto;
   text-align: left;
 }
@@ -147,17 +147,6 @@ button:focus-visible {
 
 .todo-submit {
   flex: 0 0 auto;
-}
-
-.todo-filters {
-  display: flex;
-  gap: var(--space-2);
-  margin-bottom: var(--space-6);
-}
-
-.todo-filter--active {
-  border-color: var(--accent-default);
-  background-color: var(--background-muted);
 }
 
 .todo-list {
@@ -242,26 +231,29 @@ button:focus-visible {
   font-size: var(--font-size-sm);
 }
 
-/* Todo zones (priority / pile / done) */
-.todo-zones {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: var(--space-4);
+/* Todo list: two zones (active top, done bottom) */
+.todo-list-container {
   margin-bottom: var(--space-4);
 }
 
 .todo-zone {
-  min-height: 120px;
-  padding: var(--space-3);
-  border-radius: var(--radius-md);
-  border: 1px solid var(--border-default);
-  background-color: var(--background-muted);
+  margin-bottom: var(--space-4);
+}
+
+.todo-zone:last-child {
+  margin-bottom: 0;
 }
 
 .todo-zone-title {
   margin: 0 0 var(--space-2);
   font-size: var(--font-size-sm);
   font-weight: 600;
+  color: var(--foreground-muted);
+}
+
+.todo-done-count {
+  font-weight: 400;
+  font-size: var(--font-size-sm);
   color: var(--foreground-muted);
 }
 
@@ -341,6 +333,7 @@ button:focus-visible {
 
 .todo-card-delete {
   flex-shrink: 0;
+  margin-left: auto;
   padding: var(--space-1) var(--space-2);
   font-size: var(--font-size-sm);
 }
@@ -411,18 +404,34 @@ textarea.todo-card-edit {
   background-color: var(--accent-emphasis);
 }
 
-/* Undo bar */
-.todo-undo {
+/* Pending-delete card (in-card undo) */
+.todo-card--pending-delete {
+  background-color: var(--background-muted);
+  border-color: var(--border-muted);
+}
+
+.todo-card--pending-delete .todo-card-text {
+  color: var(--foreground-muted);
+}
+
+.todo-card-undo-wrap {
   display: flex;
   align-items: center;
   gap: var(--space-2);
-  padding: var(--space-2) var(--space-3);
-  border-radius: var(--radius-md);
-  background-color: var(--background-muted);
-  border: 1px solid var(--border-default);
-  font-size: var(--font-size-sm);
+  flex: 1;
+  min-width: 0;
 }
 
-.todo-undo-button {
+.todo-card-undo-msg {
+  flex: 1;
+  min-width: 0;
+  font-size: var(--font-size-sm);
+  color: var(--foreground-muted);
+}
+
+.todo-card-undo {
   flex-shrink: 0;
+  margin-left: auto;
+  padding: var(--space-1) var(--space-2);
+  font-size: var(--font-size-sm);
 }

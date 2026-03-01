@@ -1,6 +1,5 @@
 const ZONE_BY_ID = {
-  'todo-priority-list': 'priority',
-  'todo-pile-list': 'pile',
+  'todo-active-list': 'active',
   'todo-done-list': 'done',
   'todo-delete-zone': 'delete'
 }
@@ -23,8 +22,9 @@ function getTaskIdFromCard(card) {
 /**
  * Creates spatial drag-and-drop for todo cards and zones.
  * Cards (`.todo-card` with `data-id`) can be dragged onto zone elements.
- * Zones: #todo-priority-list, #todo-pile-list, #todo-done-list, or any [data-drop-zone="priority|pile|done|delete"].
- * @param {{ onDropToZone: (taskId: string, zone: string) => void }} options
+ * Zones: #todo-active-list, #todo-done-list, or any [data-drop-zone="active|done|delete"].
+ * When dropping on a card, the drop target element is passed so the handler can reorder.
+ * @param {{ onDropToZone: (taskId: string, zone: string, dropTarget?: Element) => void }} options
  * @returns {{ destroy: () => void }}
  */
 export function createSpatialDnd({ onDropToZone }) {
@@ -49,7 +49,8 @@ export function createSpatialDnd({ onDropToZone }) {
     e.preventDefault()
     const taskId = e.dataTransfer.getData(DND_TYPE)
     if (taskId && typeof onDropToZone === 'function') {
-      onDropToZone(taskId, zone)
+      const dropTarget = e.target.closest('.todo-card') || e.target
+      onDropToZone(taskId, zone, dropTarget)
     }
   }
 

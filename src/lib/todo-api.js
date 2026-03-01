@@ -2,14 +2,15 @@ import { supabase } from './supabase.js'
 
 /**
  * @param {import('@supabase/supabase-js').Row} row
- * @returns {{ id: string, text: string, done: boolean, pinned: boolean }}
+ * @returns {{ id: string, text: string, done: boolean, pinned: boolean, created_at?: string }}
  */
 export function rowToTask(row) {
   return {
     id: row.id,
     text: row.text ?? '',
     done: !!row.done,
-    pinned: !!(row.pinned ?? false)
+    pinned: !!(row.pinned ?? false),
+    created_at: row.created_at ?? new Date().toISOString()
   }
 }
 
@@ -46,7 +47,8 @@ export async function addTask(text) {
         id: crypto.randomUUID(),
         text: nextText,
         done: false,
-        pinned: false
+        pinned: false,
+        created_at: new Date().toISOString()
       },
       error: null
     }

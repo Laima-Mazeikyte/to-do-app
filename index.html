@@ -22,32 +22,17 @@
           <button type="submit" id="todo-submit" class="todo-submit">Add</button>
         </form>
 
-        <div class="todo-filters" role="tablist" aria-label="Filter tasks">
-          <button type="button" role="tab" class="todo-filter todo-filter--active" aria-selected="true" data-filter="all">All</button>
-          <button type="button" role="tab" class="todo-filter" aria-selected="false" data-filter="active">Active</button>
-          <button type="button" role="tab" class="todo-filter" aria-selected="false" data-filter="done">Done</button>
-        </div>
-
         <div id="todo-error" class="todo-error" role="alert" hidden></div>
 
-        <div class="todo-zones">
-          <div class="todo-zone">
-            <h2 class="todo-zone-title">Priority</h2>
-            <ul id="todo-priority-list" class="todo-list" aria-label="Priority tasks"></ul>
-          </div>
-          <div class="todo-zone">
+        <div class="todo-list-container">
+          <section class="todo-zone todo-zone--active" aria-label="To do">
             <h2 class="todo-zone-title">To do</h2>
-            <ul id="todo-pile-list" class="todo-list" aria-label="Tasks to do"></ul>
-          </div>
-          <div class="todo-zone">
-            <h2 class="todo-zone-title">Done <span id="todo-done-count" aria-live="polite">0</span></h2>
-            <ul id="todo-done-list" class="todo-list" aria-label="Done tasks"></ul>
-          </div>
-        </div>
-
-        <div id="todo-undo" class="todo-undo" hidden role="status">
-          <span id="todo-undo-text"></span>
-          <button type="button" id="todo-undo-button" class="todo-undo-button">Undo</button>
+            <ul id="todo-active-list" class="todo-list" aria-label="Incomplete tasks" data-drop-zone="active"></ul>
+          </section>
+          <section class="todo-zone todo-zone--done" aria-label="Done">
+            <h2 class="todo-zone-title">Done <span id="todo-done-count" class="todo-done-count" aria-live="polite">0</span></h2>
+            <ul id="todo-done-list" class="todo-list" aria-label="Completed tasks" data-drop-zone="done"></ul>
+          </section>
         </div>
       </section>
     </div>

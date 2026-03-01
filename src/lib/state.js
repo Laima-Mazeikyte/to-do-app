@@ -4,7 +4,7 @@
  * No DOM or API calls.
  */
 
-/** @type {{ tasks: Array<{ id: string, text: string, done: boolean, pinned: boolean }>, loading: boolean, error: string | null, lastAddedTaskId: string | null, supportsPinnedPersistence: boolean }} */
+/** @type {{ tasks: Array<{ id: string, text: string, done: boolean, pinned: boolean, created_at?: string }>, loading: boolean, error: string | null, lastAddedTaskId: string | null, supportsPinnedPersistence: boolean }} */
 const state = {
   tasks: [],
   loading: false,
@@ -55,6 +55,28 @@ export function removeTaskById(id) {
 export function updateTask(id, patch) {
   const task = state.tasks.find((t) => t.id === id)
   if (task) Object.assign(task, patch)
+}
+
+/** Move task to the top of the "done" segment (most recently completed first). */
+export function reorderTaskToDoneTop(id) {
+  const idx = state.tasks.findIndex((t) => t.id === id)
+  if (idx === -1) return
+  const task = state.tasks[idx]
+  if (!task.done) return
+  const active = state.tasks.filter((t) => !t.done)
+  const done = state.tasks.filter((t) => t.done)
+  const doneWithout = done.filter((t) => t.id !== id)
+  state.tasks = [...active, task, ...doneWithout]
+}
+
+/** Set the order of active (incomplete) tasks by id. Preserves done segment order. */
+export function setActiveTaskOrder(orderedIds) {
+  const active = state.tasks.filter((t) => !t.done)
+  const done = state.tasks.filter((t) => t.done)
+  const orderedActive = orderedIds
+    .map((id) => active.find((t) => t.id === id))
+    .filter(Boolean)
+  state.tasks = [...orderedActive, ...done]
 }
 
 export function addPendingDelete(id, data) {
