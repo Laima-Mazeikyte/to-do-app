@@ -1,0 +1,5 @@
+-- Optional: add sample todos for local development.
+-- Leave empty or add rows, e.g.:
+-- insert into public.todos (text, done, pinned) values
+--   ('Try the to-do app', false, false),
+--   ('Run supabase db push', false, true);
