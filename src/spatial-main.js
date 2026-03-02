@@ -11,6 +11,13 @@ import { initSpatialView } from './views/spatial-view.js'
   const spatialView = initSpatialView(supabase)
   const reloadTasks = spatialView?.reloadTasks ?? (() => {})
 
+  /** Wait for layout to settle after DOM changes (e.g. auth header update). */
+  function waitForLayout() {
+    return new Promise((resolve) => {
+      requestAnimationFrame(() => requestAnimationFrame(resolve))
+    })
+  }
+
   const authHeaderEl = document.getElementById('auth-header')
   let authModal = null
 
@@ -23,13 +30,17 @@ import { initSpatialView } from './views/spatial-view.js'
     const { user, isAnonymous } = await getAuthState()
     authHeaderEl.innerHTML = ''
     if (isAnonymous || !user?.email) {
-      const btn = document.createElement('button')
-      btn.type = 'button'
-      btn.className = 'auth-header-btn'
-      btn.textContent = 'Sign in'
-      btn.setAttribute('aria-label', 'Sign in or create account')
-      btn.addEventListener('click', () => authModal?.open())
-      authHeaderEl.appendChild(btn)
+      const guestText = document.createElement('span')
+      guestText.className = 'auth-header-guest-text'
+      guestText.textContent = 'Using app as guest'
+      const signInLink = document.createElement('button')
+      signInLink.type = 'button'
+      signInLink.className = 'auth-header-signin-link'
+      signInLink.textContent = 'Sign in'
+      signInLink.setAttribute('aria-label', 'Sign in or create account')
+      signInLink.addEventListener('click', () => authModal?.open())
+      authHeaderEl.appendChild(guestText)
+      authHeaderEl.appendChild(signInLink)
     } else {
       const emailSpan = document.createElement('span')
       emailSpan.className = 'auth-header-email'
@@ -42,8 +53,9 @@ import { initSpatialView } from './views/spatial-view.js'
       signOutBtn.addEventListener('click', async () => {
         await signOut()
         await ensureSession()
-        await reloadTasks()
         await refreshAuthHeader()
+        await waitForLayout()
+        // reloadTasks runs via onAuthStateChange – avoids double reload race
       })
       authHeaderEl.appendChild(emailSpan)
       authHeaderEl.appendChild(signOutBtn)
@@ -55,14 +67,21 @@ import { initSpatialView } from './views/spatial-view.js'
       signIn,
       signUp,
       onSuccess: async () => {
-        await reloadTasks()
         await refreshAuthHeader()
+        await waitForLayout()
+        // reloadTasks runs via onAuthStateChange – avoids double reload race
       }
     })
     onAuthStateChange(async (event) => {
-      if (event === 'SIGNED_OUT') await ensureSession()
-      await reloadTasks()
+      if (event === 'SIGNED_OUT') {
+        await ensureSession()
+        await refreshAuthHeader()
+        await waitForLayout()
+        return
+      }
       await refreshAuthHeader()
+      await waitForLayout()
+      await reloadTasks()
     })
   }
 

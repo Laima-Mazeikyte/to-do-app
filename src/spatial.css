@@ -8,6 +8,7 @@
 }
 
 .spatial-app {
+  position: relative;
   display: flex;
   flex-direction: column;
   min-height: 100vh;
@@ -16,114 +17,221 @@
   color: var(--foreground-default);
 }
 
-.spatial-header {
-  flex-shrink: 0;
-  padding: var(--space-4);
-  background: var(--background-default);
-  border-bottom: 1px solid var(--border-default);
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: center;
-  gap: var(--space-3);
-}
-
-.spatial-drop-zone {
+/* Floating top bar: no background, elements float over stage */
+.spatial-floating-top {
   position: absolute;
-  top: var(--space-4);
-  padding: var(--space-5) var(--space-6);
-  border-radius: var(--radius-lg);
-  border: 3px dashed var(--border-default);
-  font-size: var(--font-size-base);
-  color: var(--foreground-muted);
+  top: 0;
+  left: 0;
+  right: 0;
+  padding: var(--space-4);
   display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--space-3);
-  min-height: 64px;
-  min-width: 160px;
-  max-width: 220px;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-4);
   pointer-events: none;
+  z-index: 10;
+}
+.spatial-floating-top > * {
+  pointer-events: auto;
 }
 
-.spatial-drop-zone--done {
-  left: var(--space-4);
-}
-
-.spatial-drop-zone--delete {
-  right: var(--space-4);
-}
-
-.spatial-drop-zone--done {
-  border-color: var(--success-default);
-  color: var(--success-emphasis);
-  background: color-mix(in srgb, var(--success-default) 8%, transparent);
-}
-
-.spatial-drop-zone--delete {
-  border-color: var(--danger-default);
-  color: var(--danger-emphasis);
-  background: color-mix(in srgb, var(--danger-default) 8%, transparent);
-}
-
-.spatial-drop-zone-count {
-  font-weight: 700;
-  color: inherit;
-}
-
-.spatial-form {
+/* Top-center: add row + filters + search stacked */
+.spatial-top-center {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  flex: none;
   display: flex;
-  gap: var(--space-2);
+  flex-direction: column;
   align-items: center;
+  gap: var(--space-3);
+}
+
+/* Add row: input (separate) + circular buttons (separate) */
+.spatial-add-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.spatial-form--add {
   flex: 1;
   min-width: 0;
-  max-width: 28rem;
+  max-width: 20rem;
 }
 
-.spatial-nav-link {
-  font-weight: 500;
-  color: var(--accent-default);
-  text-decoration: none;
-}
-.spatial-nav-link:hover {
-  color: var(--accent-emphasis);
-}
-
-.spatial-input {
-  flex: 1;
-  min-width: 0;
-  padding: var(--space-2) var(--space-3);
-  font-size: var(--font-size-base);
-  font-family: inherit;
-  border-radius: var(--radius-md);
-  border: 1px solid var(--border-default);
-  background: var(--background-default);
-  color: var(--foreground-default);
-}
-.spatial-input:focus {
-  outline: 2px solid var(--accent-default);
-  outline-offset: var(--space-1);
-}
-
-.spatial-submit {
-  flex-shrink: 0;
-  padding: var(--space-2) var(--space-4);
-  border-radius: var(--radius-md);
-  border: 1px solid var(--border-default);
-  background: var(--accent-default);
-  color: white;
-  font-weight: 500;
-  cursor: pointer;
-}
-.spatial-submit:hover {
-  background: var(--accent-emphasis);
-}
-
-.spatial-error {
+.spatial-input--add {
   width: 100%;
   padding: var(--space-2) var(--space-3);
   font-size: var(--font-size-sm);
+  border-radius: 9999px;
+  border: 1px solid var(--border-default);
+  background: var(--background-default);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  box-sizing: border-box;
+}
+.spatial-input--add:focus {
+  outline: 2px solid var(--accent-default);
+  outline-offset: 2px;
+}
+
+.spatial-add-buttons {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.spatial-btn-circle {
+  width: 2.25rem;
+  height: 2.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  border: none;
+  cursor: pointer;
+  font-size: 1.125rem;
+  line-height: 1;
+}
+.spatial-btn-circle--add {
+  background: var(--accent-default);
+  color: white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+.spatial-btn-circle--add:hover {
+  background: var(--accent-emphasis);
+}
+.spatial-btn-circle--more {
+  background: var(--background-default);
+  color: var(--foreground-muted);
+  border: 1px solid var(--border-default);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+.spatial-btn-circle--more:hover {
+  color: var(--foreground-default);
+  background: var(--background-muted);
+}
+
+
+/* Auth footer: below stage, acts as floor/wall – cards must not overlap it */
+.spatial-auth-footer {
+  flex-shrink: 0;
+  padding: var(--space-3) var(--space-4);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  z-index: 5;
+}
+
+.spatial-more-wrap {
+  position: relative;
+}
+.spatial-more-menu {
+  position: absolute;
+  top: calc(100% + var(--space-1));
+  right: 0;
+  min-width: 10rem;
+  padding: var(--space-1);
+  background: var(--background-default);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+  z-index: 20;
+}
+.spatial-more-item {
+  display: block;
+  width: 100%;
+  padding: var(--space-2) var(--space-3);
+  font-size: var(--font-size-sm);
+  font-family: inherit;
+  text-align: left;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--foreground-default);
+  border-radius: var(--radius-md);
+}
+.spatial-more-item:hover {
+  background: var(--background-muted);
+}
+
+/* Filter chips */
+.spatial-filters {
+  display: flex;
+  gap: var(--space-1);
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.spatial-filter-chip {
+  padding: var(--space-1) var(--space-2);
+  font-size: 0.8125rem;
+  font-family: inherit;
+  border-radius: 9999px;
+  border: 1px solid var(--border-default);
+  background: var(--background-default);
+  color: var(--foreground-muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+.spatial-filter-chip:hover {
+  color: var(--foreground-default);
+  background: var(--background-muted);
+}
+.spatial-filter-chip--active {
+  background: var(--accent-default);
+  color: white;
+  border-color: var(--accent-default);
+}
+.spatial-filter-chip--active:hover {
+  background: var(--accent-emphasis);
+  color: white;
+}
+.spatial-filter-search-icon {
+  flex-shrink: 0;
+}
+
+/* Search wrap - below filters */
+.spatial-search-wrap {
+  width: 100%;
+  max-width: 20rem;
+}
+.spatial-search-wrap .spatial-search-input {
+  width: 100%;
+  padding: var(--space-2) var(--space-3);
+  font-size: var(--font-size-sm);
+  font-family: inherit;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-default);
+  background: var(--background-default);
+  color: var(--foreground-default);
+  box-sizing: border-box;
+}
+.spatial-search-wrap .spatial-search-input:focus {
+  outline: 2px solid var(--accent-default);
+  outline-offset: 2px;
+}
+.spatial-search-wrap .spatial-search-input::placeholder {
+  color: var(--foreground-muted);
+}
+
+/* Error: below form, non-intrusive */
+.spatial-error {
+  position: absolute;
+  top: calc(var(--space-4) + 4rem);
+  left: 50%;
+  transform: translateX(-50%);
+  padding: var(--space-2) var(--space-4);
+  font-size: var(--font-size-sm);
   color: var(--danger-default);
+  z-index: 20;
+  max-width: 90vw;
+  border-radius: var(--radius-lg);
+  background: color-mix(in srgb, var(--danger-default) 8%, var(--background-default));
 }
 
 .spatial-stage {
@@ -137,12 +245,12 @@
   position: absolute;
   inset: 0;
   background: rgba(0, 0, 0, 0.25);
-  z-index: 1;
+  z-index: 10000;
   pointer-events: none;
 }
 
 .spatial-card--editing {
-  z-index: 2;
+  z-index: 10001;
   pointer-events: auto;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
 }
@@ -155,28 +263,17 @@
   align-items: stretch;
   box-sizing: border-box;
   padding: 0;
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-lg);
   border: 1px solid var(--border-default);
   background: var(--background-default);
   color: var(--foreground-default);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
   pointer-events: auto;
   transition: box-shadow 0.15s ease, background-color 0.15s ease;
-  min-width: 100px;
-  max-width: 320px;
+  min-width: 90px;
+  max-width: 280px;
   width: max-content;
-  min-height: 56px;
-}
-
-/* Dragging over "mark as done" zone: pulsate + green tint */
-.spatial-card--over-done {
-  background: color-mix(in srgb, var(--success-default) 22%, var(--background-default));
-  box-shadow: 0 2px 12px color-mix(in srgb, var(--success-default) 35%, transparent);
-}
-
-/* Dragging over "delete" zone */
-.spatial-card--over-delete {
-  box-shadow: 0 2px 12px color-mix(in srgb, var(--danger-default) 35%, transparent);
+  min-height: 44px;
 }
 
 .spatial-card-inner {
@@ -189,35 +286,67 @@
 
 .spatial-card-handle {
   flex-shrink: 0;
-  width: 28px;
+  width: 24px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: grab;
   color: var(--foreground-muted);
-  font-size: 0.9rem;
+  font-size: 0.75rem;
   user-select: none;
   border-right: 1px solid var(--border-default);
-  padding: 0 var(--space-2);
+  padding: 0 var(--space-1);
 }
 .spatial-card-handle:active {
   cursor: grabbing;
+}
+
+.spatial-card-checkbox-wrap {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  padding: 0 0 0 var(--space-1);
+}
+.spatial-card-checkbox {
+  width: 1rem;
+  height: 1rem;
+  cursor: pointer;
+  accent-color: var(--accent-default);
+  transition: transform 0.15s ease;
+}
+.spatial-card-checkbox:hover {
+  transform: scale(1.15);
+}
+
+.spatial-card-delete {
+  flex-shrink: 0;
+  padding: 0 var(--space-2) 0 var(--space-1);
+  font-size: var(--font-size-sm);
+  font-family: inherit;
+  border: none;
+  background: none;
+  color: var(--foreground-muted);
+  cursor: pointer;
+  border-radius: 0 var(--radius-lg) var(--radius-lg) 0;
+  transition: transform 0.15s ease;
+}
+.spatial-card-delete:hover {
+  transform: scale(1.35);
 }
 
 .spatial-card-controls {
   flex: 1;
   display: flex;
   align-items: center;
-  gap: var(--space-3);
   min-width: 0;
-  padding: var(--space-2) var(--space-3);
+  padding: var(--space-1) var(--space-2) var(--space-1) var(--space-2);
   overflow: hidden;
 }
 
 .spatial-card-text {
   flex: 1;
   min-width: 0;
-  max-width: 200px;
+  max-width: 180px;
   text-align: left;
   white-space: pre-line;
   overflow-wrap: break-word;
@@ -242,8 +371,10 @@
   user-select: none;
 }
 
+.spatial-card--done {
+  background-color: var(--background-muted);
+}
 .spatial-card--done .spatial-card-text {
-  text-decoration: line-through;
   color: var(--foreground-muted);
 }
 
@@ -315,45 +446,28 @@ textarea.spatial-card-edit {
   background-color: var(--accent-emphasis);
 }
 
-/* Paste todos drawer */
+/* Search: inside form bar, next to Add task */
 .spatial-search-input {
-  flex: 0 1 12rem;
-  min-width: 0;
+  flex: 0 1 10rem;
+  min-width: 6rem;
+  max-width: 12rem;
   padding: var(--space-2) var(--space-3);
-  font-size: var(--font-size-base);
+  font-size: var(--font-size-sm);
   font-family: inherit;
-  border-radius: var(--radius-md);
-  border: 1px solid var(--border-default);
-  background: var(--background-default);
+  border-radius: var(--radius-lg);
+  border: none;
+  background: var(--background-muted);
   color: var(--foreground-default);
+}
+.spatial-form--floating .spatial-search-input {
+  background: var(--background-muted);
 }
 .spatial-search-input:focus {
   outline: 2px solid var(--accent-default);
-  outline-offset: var(--space-1);
+  outline-offset: 0;
 }
 .spatial-search-input::placeholder {
   color: var(--foreground-muted);
-}
-
-.spatial-card--search-hidden {
-  opacity: 0.25;
-  pointer-events: none;
-}
-
-.spatial-paste-todos-btn {
-  flex-shrink: 0;
-  padding: var(--space-2) var(--space-4);
-  border-radius: var(--radius-md);
-  border: 1px solid var(--border-default);
-  background: var(--background-default);
-  color: var(--foreground-default);
-  font-size: var(--font-size-base);
-  font-weight: 500;
-  cursor: pointer;
-}
-.spatial-paste-todos-btn:hover {
-  background: var(--background-muted);
-  color: var(--foreground-default);
 }
 
 .spatial-drawer-backdrop {
@@ -469,11 +583,11 @@ textarea.spatial-card-edit {
   display: flex;
   align-items: center;
   gap: var(--space-2);
-  padding: var(--space-2) var(--space-3);
+  padding: var(--space-3) var(--space-4);
   background: var(--background-default);
   border: 1px solid var(--border-default);
-  border-radius: var(--radius-md);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border-radius: var(--radius-xl);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08), 0 2px 8px rgba(0, 0, 0, 0.04);
   z-index: 50;
   font-size: var(--font-size-sm);
   color: var(--foreground-muted);
@@ -490,10 +604,10 @@ textarea.spatial-card-edit {
 
 .spatial-undo-btn {
   flex-shrink: 0;
-  padding: var(--space-1) var(--space-2);
-  font-size: 0.75rem;
+  padding: var(--space-2) var(--space-3);
+  font-size: 0.8125rem;
   font-weight: 500;
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-lg);
   background: var(--accent-default);
   color: white;
   border: none;

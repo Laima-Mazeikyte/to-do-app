@@ -43,17 +43,32 @@ a:hover {
   border: 0;
 }
 
-/* Auth header */
+/* Auth block (footer: one line, no background) */
 .spatial-auth-header {
   display: flex;
+  flex-direction: row;
   align-items: center;
   gap: var(--space-2);
-  margin-left: auto;
 }
 
-.auth-header-btn,
-.auth-header-signout {
+.auth-header-guest-text {
   font-size: var(--font-size-sm);
+  color: var(--foreground-muted);
+}
+
+.auth-header-signin-link {
+  font-size: var(--font-size-sm);
+  color: var(--accent-default);
+  text-decoration: underline;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  font-family: inherit;
+  font-weight: 500;
+}
+.auth-header-signin-link:hover {
+  color: var(--accent-emphasis);
 }
 
 .auth-header-email {
@@ -63,6 +78,21 @@ a:hover {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.auth-header-signout {
+  font-size: var(--font-size-sm);
+  color: var(--accent-default);
+  text-decoration: underline;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  font-family: inherit;
+  font-weight: 500;
+}
+.auth-header-signout:hover {
+  color: var(--accent-emphasis);
 }
 
 /* Auth modal */

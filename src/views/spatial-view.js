@@ -16,16 +16,18 @@ const Body = Matter.Body
 const DRAWER_FOCUSABLE = 'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
 const DELETE_UNDO_MS = 5000
 
-const CARD_MIN_WIDTH = 100
-const CARD_MAX_WIDTH = 320
-const CARD_MIN_HEIGHT = 56
+const CARD_MIN_WIDTH = 90
+const CARD_MAX_WIDTH = 280
+const CARD_MIN_HEIGHT = 44
 const CARD_MAX_HEIGHT = 120
 const FLOOR_HEIGHT = 60
 const SPAWN_Y = 72
 const GRAVITY = 0.8
 
+/** @typedef {'all' | 'todo' | 'done'} FilterMode */
+
 /**
- * Initialize the spatial (physics) view. Sets up DOM refs, physics, paste drawer, and event listeners.
+ * Initialize the spatial (physics) view. Sets up DOM refs, physics, paste drawer, filters, and event listeners.
  * @param {import('@supabase/supabase-js').SupabaseClient | null} supabase
  */
 export function initSpatialView(supabase) {
@@ -33,10 +35,7 @@ export function initSpatialView(supabase) {
   const input = document.getElementById('spatial-todo-input')
   const errorEl = document.getElementById('spatial-error')
   const stageEl = document.getElementById('spatial-stage')
-  const zoneDoneEl = document.getElementById('spatial-zone-done')
-  const zoneDeleteEl = document.getElementById('spatial-zone-delete')
-  const doneCountEl = document.getElementById('spatial-done-count')
-  const pasteTodosBtn = document.getElementById('spatial-paste-todos-btn')
+  const footerEl = document.getElementById('spatial-auth-footer')
   const pasteDrawerBackdrop = document.getElementById('spatial-paste-drawer-backdrop')
   const pasteDrawer = document.getElementById('spatial-paste-drawer')
   const pasteDrawerTextarea = document.getElementById('spatial-paste-drawer-textarea')
@@ -47,6 +46,10 @@ export function initSpatialView(supabase) {
   const undoMsgEl = document.getElementById('spatial-undo-msg')
   const undoBtnEl = document.getElementById('spatial-undo-btn')
   const searchInputEl = document.getElementById('spatial-search-input')
+  const searchWrapEl = document.getElementById('spatial-search-wrap')
+  const filterChips = document.querySelectorAll('.spatial-filter-chip')
+  const moreBtn = document.getElementById('spatial-more-btn')
+  const moreMenu = document.getElementById('spatial-more-menu')
 
   let engine = null
   let floor = null
@@ -59,9 +62,20 @@ export function initSpatialView(supabase) {
   const state = { tasks: [], error: null, loading: true }
   /** @type {{ task: { id: string, text: string, done: boolean }, timerId: number } | null} */
   let pendingDelete = null
+  /** @type {FilterMode} */
+  let filterMode = 'all'
+  let searchActive = false
 
   function getStageRect() {
     return stageEl.getBoundingClientRect()
+  }
+
+  /** Y coordinate (in stage space) for the top of the footer – cards must not go below this. */
+  function getFooterTopY() {
+    if (!footerEl) return getStageRect().height - FLOOR_HEIGHT
+    const stageRect = getStageRect()
+    const footerRect = footerEl.getBoundingClientRect()
+    return footerRect.top - stageRect.top
   }
 
   function showError(message) {
@@ -72,15 +86,41 @@ export function initSpatialView(supabase) {
     }
   }
 
+  function getVisibleTasks() {
+    const searchQuery = (searchInputEl?.value ?? '').trim().toLowerCase()
+    return state.tasks.filter((task) => {
+      const matchesFilter =
+        filterMode === 'all' ||
+        (filterMode === 'todo' && !task.done) ||
+        (filterMode === 'done' && task.done)
+      const matchesSearch = !searchQuery || task.text.toLowerCase().includes(searchQuery)
+      return matchesFilter && matchesSearch
+    })
+  }
+
+  function getVisibleTaskIds() {
+    return new Set(getVisibleTasks().map((t) => t.id))
+  }
+
+  function copyVisibleTodosAsMarkdown() {
+    const visible = getVisibleTasks()
+    const lines = visible.map((t) => (t.done ? `- [x] ${t.text}` : `- [ ] ${t.text}`))
+    const text = lines.join('\n')
+    if (text) {
+      navigator.clipboard.writeText(text)
+    }
+  }
+
   function initPhysics() {
     const rect = getStageRect()
+    const footerTopY = getFooterTopY()
     engine = Engine.create({
       gravity: { x: 0, y: GRAVITY }
     })
     engine.world.bounds = { min: { x: 0, y: 0 }, max: { x: rect.width, y: rect.height } }
 
     const floorX = rect.width / 2
-    const floorY = rect.height - FLOOR_HEIGHT / 2
+    const floorY = footerTopY + FLOOR_HEIGHT / 2
     floor = Bodies.rectangle(floorX, floorY, Math.max(rect.width + 2, 4000), FLOOR_HEIGHT, {
       isStatic: true,
       render: { visible: false }
@@ -88,11 +128,13 @@ export function initSpatialView(supabase) {
     World.add(engine.world, floor)
 
     const wallThick = 20
-    leftWall = Bodies.rectangle(-wallThick / 2, rect.height / 2, wallThick, rect.height + 100, {
+    const wallHeight = Math.max(rect.height, footerTopY) + FLOOR_HEIGHT + 100
+    const wallCenterY = wallHeight / 2
+    leftWall = Bodies.rectangle(-wallThick / 2, wallCenterY, wallThick, wallHeight, {
       isStatic: true,
       render: { visible: false }
     })
-    rightWall = Bodies.rectangle(rect.width + wallThick / 2, rect.height / 2, wallThick, rect.height + 100, {
+    rightWall = Bodies.rectangle(rect.width + wallThick / 2, wallCenterY, wallThick, wallHeight, {
       isStatic: true,
       render: { visible: false }
     })
@@ -106,6 +148,7 @@ export function initSpatialView(supabase) {
   function createCardElement(task) {
     const card = document.createElement('article')
     card.className = 'spatial-card'
+    if (task.done) card.classList.add('spatial-card--done')
     card.dataset.id = task.id
     card.style.minHeight = CARD_MIN_HEIGHT + 'px'
 
@@ -116,6 +159,16 @@ export function initSpatialView(supabase) {
     handle.className = 'spatial-card-handle'
     handle.setAttribute('aria-hidden', 'true')
     handle.textContent = '⋮⋮'
+
+    const checkboxWrap = document.createElement('div')
+    checkboxWrap.className = 'spatial-card-checkbox-wrap'
+    const checkbox = document.createElement('input')
+    checkbox.type = 'checkbox'
+    checkbox.className = 'spatial-card-checkbox'
+    checkbox.checked = task.done
+    checkbox.setAttribute('aria-label', `Mark "${task.text}" as ${task.done ? 'to do' : 'done'}`)
+    checkbox.addEventListener('change', () => toggleDone(task.id))
+    checkboxWrap.appendChild(checkbox)
 
     const controls = document.createElement('div')
     controls.className = 'spatial-card-controls'
@@ -136,11 +189,41 @@ export function initSpatialView(supabase) {
       }
     })
 
+    const deleteBtn = document.createElement('button')
+    deleteBtn.type = 'button'
+    deleteBtn.className = 'spatial-card-delete'
+    deleteBtn.textContent = '×'
+    deleteBtn.setAttribute('aria-label', `Delete "${task.text}"`)
+    deleteBtn.addEventListener('click', (e) => {
+      e.stopPropagation()
+      queueDeleteCard(task.id)
+    })
+
     controls.appendChild(textSpan)
     inner.appendChild(handle)
+    inner.appendChild(checkboxWrap)
     inner.appendChild(controls)
+    inner.appendChild(deleteBtn)
     card.appendChild(inner)
     return card
+  }
+
+  function toggleDone(id) {
+    const task = state.tasks.find((t) => t.id === id)
+    if (!task) return
+    const newDone = !task.done
+    apiSetDone(id, newDone).then(({ ok, error }) => {
+      if (!ok && error) showError(error)
+    })
+    task.done = newDone
+    const entry = cardMap.get(id)
+    if (entry) {
+      entry.task.done = newDone
+      entry.element.classList.toggle('spatial-card--done', newDone)
+      const checkbox = entry.element.querySelector('.spatial-card-checkbox')
+      if (checkbox) checkbox.checked = newDone
+    }
+    syncPileToFilter()
   }
 
   function createCardBody(x, y, width, height) {
@@ -161,15 +244,11 @@ export function initSpatialView(supabase) {
     return { halfW: w / 2, halfH: h / 2 }
   }
 
-  function isPointInElement(clientX, clientY, el) {
-    if (!el) return false
-    const rect = el.getBoundingClientRect()
-    return clientX >= rect.left && clientX <= rect.right && clientY >= rect.top && clientY <= rect.bottom
-  }
-
-  function updateDoneCount() {
-    const count = state.tasks.filter((t) => t.done).length
-    if (doneCountEl) doneCountEl.textContent = count
+  /** Vertical extent from body center to bottom edge of rotated rectangle. */
+  function getBodyBottomExtent(body) {
+    const { halfW, halfH } = getBodyHalfSize(body)
+    const a = Math.abs(body.angle ?? 0)
+    return halfH * Math.abs(Math.cos(a)) + halfW * Math.abs(Math.sin(a))
   }
 
   function addCardToWorld(task, x, y) {
@@ -202,14 +281,21 @@ export function initSpatialView(supabase) {
     let dragging = false
     let offsetX = 0
     let offsetY = 0
-    let lastClientX = 0
-    let lastClientY = 0
 
     function getWorldCoords(clientX, clientY) {
       const rect = getStageRect()
+      return { x: clientX - rect.left, y: clientY - rect.top }
+    }
+
+    function clampToStage(x, y) {
+      const rect = getStageRect()
+      const footerTopY = getFooterTopY()
+      const { halfW } = getBodyHalfSize(body)
+      const bottomExtent = getBodyBottomExtent(body)
+      const maxY = footerTopY - bottomExtent
       return {
-        x: clientX - rect.left,
-        y: clientY - rect.top
+        x: Math.max(halfW, Math.min(rect.width - halfW, x)),
+        y: Math.max(bottomExtent, Math.min(maxY, y))
       }
     }
 
@@ -219,8 +305,6 @@ export function initSpatialView(supabase) {
       const coords = getWorldCoords(e.clientX, e.clientY)
       offsetX = coords.x - body.position.x
       offsetY = coords.y - body.position.y
-      lastClientX = e.clientX
-      lastClientY = e.clientY
       dragging = true
       Body.setStatic(body, true)
       Body.setAngle(body, 0)
@@ -230,49 +314,19 @@ export function initSpatialView(supabase) {
       document.addEventListener('pointercancel', onPointerUp)
     }
 
-    function updateOverZones() {
-      const overDone = isPointInElement(lastClientX, lastClientY, zoneDoneEl)
-      const overDelete = isPointInElement(lastClientX, lastClientY, zoneDeleteEl)
-      cardEl.classList.toggle('spatial-card--over-done', overDone && !overDelete)
-      cardEl.classList.toggle('spatial-card--over-delete', overDelete && !overDone)
-    }
-
-    function clampToStage(x, y) {
-      const rect = getStageRect()
-      const { halfW, halfH } = getBodyHalfSize(body)
-      return {
-        x: Math.max(halfW, Math.min(rect.width - halfW, x)),
-        y: Math.max(halfH, Math.min(rect.height - halfH, y))
-      }
-    }
-
     function onPointerMove(e) {
       if (!dragging) return
-      lastClientX = e.clientX
-      lastClientY = e.clientY
       const coords = getWorldCoords(e.clientX, e.clientY)
       const clamped = clampToStage(coords.x - offsetX, coords.y - offsetY)
       Body.setPosition(body, clamped)
-      updateOverZones()
     }
 
     function onPointerUp() {
       if (!dragging) return
       dragging = false
-      cardEl.classList.remove('spatial-card--over-done', 'spatial-card--over-delete')
       document.removeEventListener('pointermove', onPointerMove)
       document.removeEventListener('pointerup', onPointerUp)
       document.removeEventListener('pointercancel', onPointerUp)
-
-      if (isPointInElement(lastClientX, lastClientY, zoneDoneEl)) {
-        markDoneAndRemoveFromStage(taskId)
-        return
-      }
-      if (isPointInElement(lastClientX, lastClientY, zoneDeleteEl)) {
-        queueDeleteCard(taskId)
-        return
-      }
-
       Body.setStatic(body, false)
       Body.setVelocity(body, { x: 0, y: 0 })
     }
@@ -280,40 +334,52 @@ export function initSpatialView(supabase) {
     handleEl.addEventListener('pointerdown', onPointerDown)
   }
 
-  function markDoneAndRemoveFromStage(id) {
-    const entry = cardMap.get(id)
-    if (!entry) return
-    apiSetDone(id, true).then(({ ok, error }) => {
-      if (!ok && error) showError(error)
-    })
-    const task = state.tasks.find((t) => t.id === id)
-    if (task) task.done = true
-    World.remove(engine.world, entry.body)
-    entry.element.remove()
-    cardMap.delete(id)
-    updateDoneCount()
-  }
-
   function clampBodyToStage(body) {
     const rect = getStageRect()
-    const { halfW, halfH } = getBodyHalfSize(body)
+    const footerTopY = getFooterTopY()
+    const { halfW } = getBodyHalfSize(body)
+    const bottomExtent = getBodyBottomExtent(body)
+    const maxY = footerTopY - bottomExtent
     const x = Math.max(halfW, Math.min(rect.width - halfW, body.position.x))
-    const y = Math.max(halfH, Math.min(rect.height - halfH, body.position.y))
+    const y = Math.max(bottomExtent, Math.min(maxY, body.position.y))
     if (x !== body.position.x || y !== body.position.y) {
       Body.setPosition(body, { x, y })
     }
   }
 
   function syncBodyToDom() {
-    const query = (searchInputEl?.value ?? '').trim().toLowerCase()
-    for (const [, { body, element, task }] of cardMap) {
+    for (const [, { body, element }] of cardMap) {
       clampBodyToStage(body)
       element.style.left = body.position.x + 'px'
       element.style.top = body.position.y + 'px'
       element.style.transform = `translate(-50%, -50%) rotate(${body.angle}rad)`
-      const matches = !query || task.text.toLowerCase().includes(query)
-      element.classList.toggle('spatial-card--search-hidden', !matches)
+      // Stack cards by Y so lower cards (higher Y) appear on top, matching the pile
+      element.style.zIndex = String(Math.round(body.position.y))
     }
+  }
+
+  /** Sync the physics pile to the current filter: remove filtered-out cards, add filtered-in cards. */
+  function syncPileToFilter() {
+    if (!engine) return
+    const visibleIds = getVisibleTaskIds()
+    const rect = getStageRect()
+    const centerX = rect.width / 2
+
+    // Remove cards that no longer match the filter
+    for (const [id, entry] of [...cardMap.entries()]) {
+      if (!visibleIds.has(id)) {
+        World.remove(engine.world, entry.body)
+        entry.element.remove()
+        cardMap.delete(id)
+      }
+    }
+
+    // Add cards that should be visible but aren't in the pile
+    const toAdd = state.tasks.filter((t) => visibleIds.has(t.id) && !cardMap.has(t.id))
+    toAdd.forEach((task, i) => {
+      const x = centerX + (Math.random() - 0.5) * 60
+      setTimeout(() => addCardToWorld(task, x, SPAWN_Y), i * 80)
+    })
   }
 
   function runLoop() {
@@ -334,9 +400,7 @@ export function initSpatialView(supabase) {
   }
 
   function hideUndoBar() {
-    if (undoBarEl) {
-      undoBarEl.hidden = true
-    }
+    if (undoBarEl) undoBarEl.hidden = true
   }
 
   function showUndoBar(taskText) {
@@ -377,8 +441,8 @@ export function initSpatialView(supabase) {
     window.clearTimeout(timerId)
     pendingDelete = null
     hideUndoBar()
-    spawnCard(task)
-    state.tasks.push(task)
+    // Task is still in state.tasks (only removed on finalizeDelete), so just re-add the card
+    syncPileToFilter()
   }
 
   function startEdit(cardEl, task) {
@@ -480,23 +544,6 @@ export function initSpatialView(supabase) {
     editField.focus()
   }
 
-  function spawnCard(task) {
-    const rect = getStageRect()
-    const x = rect.width / 2 + (Math.random() - 0.5) * 40
-    addCardToWorld(task, x, SPAWN_Y)
-  }
-
-  function spawnExistingCards(tasks) {
-    const rect = getStageRect()
-    const centerX = rect.width / 2
-    tasks.forEach((task, i) => {
-      setTimeout(() => {
-        const x = centerX + (Math.random() - 0.5) * 60
-        addCardToWorld(task, x, SPAWN_Y)
-      }, i * 120)
-    })
-  }
-
   async function onAddTask(text) {
     const { data: task, error } = await apiAddTask(text)
     if (error) {
@@ -505,7 +552,7 @@ export function initSpatialView(supabase) {
     }
     if (!task) return
     state.tasks.push(task)
-    spawnCard(task)
+    syncPileToFilter()
   }
 
   function openPasteDrawer() {
@@ -594,6 +641,67 @@ export function initSpatialView(supabase) {
     }
   }
 
+  function setFilterMode(mode) {
+    filterMode = mode
+    filterChips.forEach((chip) => {
+      const chipFilter = chip.dataset.filter
+      const active = chipFilter === mode || (chipFilter === 'search' && searchActive)
+      chip.classList.toggle('spatial-filter-chip--active', active)
+    })
+    syncPileToFilter()
+  }
+
+  function toggleSearch() {
+    searchActive = !searchActive
+    if (searchWrapEl) {
+      searchWrapEl.hidden = !searchActive
+      if (searchActive) searchInputEl?.focus()
+      else if (searchInputEl) searchInputEl.value = ''
+    }
+    setFilterMode(filterMode)
+  }
+
+  function setupFilters() {
+    filterChips.forEach((chip) => {
+      chip.addEventListener('click', () => {
+        const mode = chip.dataset.filter
+        if (mode === 'search') {
+          toggleSearch()
+        } else {
+          setFilterMode(/** @type {FilterMode} */ (mode))
+        }
+      })
+    })
+    if (searchInputEl) {
+      searchInputEl.addEventListener('input', () => syncPileToFilter())
+    }
+  }
+
+  function setupMoreMenu() {
+    if (!moreBtn || !moreMenu) return
+    moreBtn.addEventListener('click', (e) => {
+      e.preventDefault()
+      e.stopPropagation()
+      const isOpen = !moreMenu.hidden
+      moreMenu.hidden = !isOpen
+      moreBtn.setAttribute('aria-expanded', String(!isOpen))
+    })
+    document.addEventListener('click', () => {
+      moreMenu.hidden = true
+      moreBtn?.setAttribute('aria-expanded', 'false')
+    })
+    moreMenu.addEventListener('click', (e) => e.stopPropagation())
+    moreMenu.querySelectorAll('.spatial-more-item').forEach((item) => {
+      item.addEventListener('click', () => {
+        const action = item.dataset.action
+        moreMenu.hidden = true
+        moreBtn?.setAttribute('aria-expanded', 'false')
+        if (action === 'copy') copyVisibleTodosAsMarkdown()
+        if (action === 'paste') openPasteDrawer()
+      })
+    })
+  }
+
   async function loadInitialTasks() {
     if (engine) {
       for (const [, { body, element }] of cardMap) {
@@ -601,6 +709,7 @@ export function initSpatialView(supabase) {
         element.remove()
       }
       cardMap.clear()
+      initPhysics()
     }
     state.loading = true
     const { data, error } = await apiLoadTasks()
@@ -611,34 +720,34 @@ export function initSpatialView(supabase) {
     }
     state.tasks = data || []
     state.loading = false
-    updateDoneCount()
-    const activeTasks = state.tasks.filter((t) => !t.done)
-    if (activeTasks.length === 0) return
-    spawnExistingCards(activeTasks)
+    if (state.tasks.length === 0) return
+    syncPileToFilter()
   }
 
   function handleResize() {
     const rect = getStageRect()
+    const footerTopY = getFooterTopY()
+    const wallHeight = Math.max(rect.height, footerTopY) + FLOOR_HEIGHT + 100
+    const wallCenterY = wallHeight / 2
     if (floor) {
-      Body.setPosition(floor, { x: rect.width / 2, y: rect.height - FLOOR_HEIGHT / 2 })
+      Body.setPosition(floor, { x: rect.width / 2, y: footerTopY + FLOOR_HEIGHT / 2 })
     }
-    if (leftWall) Body.setPosition(leftWall, { x: -10, y: rect.height / 2 })
-    if (rightWall) Body.setPosition(rightWall, { x: rect.width + 10, y: rect.height / 2 })
+    if (leftWall) Body.setPosition(leftWall, { x: -10, y: wallCenterY })
+    if (rightWall) Body.setPosition(rightWall, { x: rect.width + 10, y: wallCenterY })
     if (topWall) Body.setPosition(topWall, { x: rect.width / 2, y: -10 })
     engine.world.bounds = { min: { x: 0, y: 0 }, max: { x: rect.width, y: rect.height } }
   }
 
   form.addEventListener('submit', (e) => {
     e.preventDefault()
-    const text = input.value
-    onAddTask(text)
-    input.value = ''
+    const text = input.value.trim()
+    if (text) {
+      onAddTask(text)
+      input.value = ''
+    }
     input.focus()
   })
 
-  if (pasteTodosBtn) {
-    pasteTodosBtn.addEventListener('click', () => openPasteDrawer())
-  }
   if (pasteDrawerBackdrop) {
     pasteDrawerBackdrop.addEventListener('click', () => closePasteDrawer())
   }
@@ -656,7 +765,16 @@ export function initSpatialView(supabase) {
     undoBtnEl.addEventListener('click', handleUndoClick)
   }
 
+  setupFilters()
+  setupMoreMenu()
+
   window.addEventListener('resize', handleResize)
+
+  // Update physics bounds when stage resizes (e.g. auth footer content changes on login/logout)
+  const resizeObserver = new ResizeObserver(() => {
+    if (engine) handleResize()
+  })
+  resizeObserver.observe(stageEl)
 
   requestAnimationFrame(() => {
     initPhysics()
