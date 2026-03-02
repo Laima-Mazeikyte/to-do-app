@@ -43,6 +43,17 @@ Features afterwards
 
 ---
 
+## Current UI (Spatial-only)
+
+The app uses a single spatial view as the main entry:
+
+- **Physics-based pile**: Cards fall and stack in a pile. Drag by the handle to move.
+- **Done zone**: Drag a card to mark as done (card leaves the pile).
+- **Delete zone**: Drag a card to delete. Undo bar appears for 5 seconds.
+- **Add task**: Form in header or paste a list via "Paste todos" button.
+- **Search**: Filter cards in the pile by text match; non-matching cards are dimmed.
+- **Edit**: Click or double-click card text to edit.
+
 ## Details on Spatial View
 
 - the card positions in the pile do not have to persist, they should load on each refresh, but the ones that are 'priority zone' should persist, but they will be at the top of the page, not in the pile.

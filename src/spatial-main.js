@@ -1,4 +1,4 @@
-import './style.css'
+import './base.css'
 import './spatial.css'
 import { supabase, ensureSession } from './lib/supabase.js'
 import { getAuthState, signIn, signUp, signOut, onAuthStateChange } from './lib/auth.js'

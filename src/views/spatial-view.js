@@ -14,6 +14,7 @@ const Bodies = Matter.Bodies
 const Body = Matter.Body
 
 const DRAWER_FOCUSABLE = 'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+const DELETE_UNDO_MS = 5000
 
 const CARD_MIN_WIDTH = 100
 const CARD_MAX_WIDTH = 320
@@ -42,6 +43,10 @@ export function initSpatialView(supabase) {
   const pasteDrawerEmpty = document.getElementById('spatial-paste-drawer-empty')
   const pasteDrawerCreate = document.getElementById('spatial-paste-drawer-create')
   const pasteDrawerCancel = document.getElementById('spatial-paste-drawer-cancel')
+  const undoBarEl = document.getElementById('spatial-undo-bar')
+  const undoMsgEl = document.getElementById('spatial-undo-msg')
+  const undoBtnEl = document.getElementById('spatial-undo-btn')
+  const searchInputEl = document.getElementById('spatial-search-input')
 
   let engine = null
   let floor = null
@@ -52,6 +57,8 @@ export function initSpatialView(supabase) {
   /** @type {Map<string, { body: Matter.Body, element: HTMLElement, task: { id: string, text: string, done: boolean } }>} */
   const cardMap = new Map()
   const state = { tasks: [], error: null, loading: true }
+  /** @type {{ task: { id: string, text: string, done: boolean }, timerId: number } | null} */
+  let pendingDelete = null
 
   function getStageRect() {
     return stageEl.getBoundingClientRect()
@@ -262,7 +269,7 @@ export function initSpatialView(supabase) {
         return
       }
       if (isPointInElement(lastClientX, lastClientY, zoneDeleteEl)) {
-        removeCard(taskId)
+        queueDeleteCard(taskId)
         return
       }
 
@@ -298,11 +305,14 @@ export function initSpatialView(supabase) {
   }
 
   function syncBodyToDom() {
-    for (const [, { body, element }] of cardMap) {
+    const query = (searchInputEl?.value ?? '').trim().toLowerCase()
+    for (const [, { body, element, task }] of cardMap) {
       clampBodyToStage(body)
       element.style.left = body.position.x + 'px'
       element.style.top = body.position.y + 'px'
       element.style.transform = `translate(-50%, -50%) rotate(${body.angle}rad)`
+      const matches = !query || task.text.toLowerCase().includes(query)
+      element.classList.toggle('spatial-card--search-hidden', !matches)
     }
   }
 
@@ -312,17 +322,63 @@ export function initSpatialView(supabase) {
     animationId = requestAnimationFrame(runLoop)
   }
 
-  function removeCard(id) {
+  async function finalizeDelete(id) {
+    if (!pendingDelete || pendingDelete.task.id !== id) return
+    window.clearTimeout(pendingDelete.timerId)
+    pendingDelete = null
+    hideUndoBar()
+    const { ok, error } = await apiRemoveTask(id)
+    if (!ok && error) showError(error)
+    const idx = state.tasks.findIndex((t) => t.id === id)
+    if (idx !== -1) state.tasks.splice(idx, 1)
+  }
+
+  function hideUndoBar() {
+    if (undoBarEl) {
+      undoBarEl.hidden = true
+    }
+  }
+
+  function showUndoBar(taskText) {
+    if (undoMsgEl) undoMsgEl.textContent = `"${taskText}" moved to trash.`
+    if (undoBarEl) undoBarEl.hidden = false
+  }
+
+  function queueDeleteCard(id) {
     const entry = cardMap.get(id)
     if (!entry) return
-    apiRemoveTask(id).then(({ ok, error }) => {
-      if (!ok && error) showError(error)
-    })
+    const task = entry.task
+
+    if (pendingDelete) {
+      window.clearTimeout(pendingDelete.timerId)
+      const prevId = pendingDelete.task.id
+      apiRemoveTask(prevId).then(({ ok, error }) => {
+        if (!ok && error) showError(error)
+      })
+      const prevIdx = state.tasks.findIndex((t) => t.id === prevId)
+      if (prevIdx !== -1) state.tasks.splice(prevIdx, 1)
+    }
+
     World.remove(engine.world, entry.body)
     entry.element.remove()
     cardMap.delete(id)
-    const idx = state.tasks.findIndex((t) => t.id === id)
-    if (idx !== -1) state.tasks.splice(idx, 1)
+
+    const timerId = window.setTimeout(() => {
+      finalizeDelete(id)
+    }, DELETE_UNDO_MS)
+
+    pendingDelete = { task, timerId }
+    showUndoBar(task.text)
+  }
+
+  function handleUndoClick() {
+    if (!pendingDelete) return
+    const { task, timerId } = pendingDelete
+    window.clearTimeout(timerId)
+    pendingDelete = null
+    hideUndoBar()
+    spawnCard(task)
+    state.tasks.push(task)
   }
 
   function startEdit(cardEl, task) {
@@ -594,6 +650,10 @@ export function initSpatialView(supabase) {
   }
   if (pasteDrawer) {
     pasteDrawer.addEventListener('keydown', trapDrawerFocus)
+  }
+
+  if (undoBtnEl) {
+    undoBtnEl.addEventListener('click', handleUndoClick)
   }
 
   window.addEventListener('resize', handleResize)

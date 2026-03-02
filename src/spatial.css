@@ -1,5 +1,5 @@
 /* Spatial view: physics stage and cards. Token reference and component map: see docs/STYLE.md */
-@import "./tokens.css";
+/* Tokens loaded via base.css */
 
 #app.spatial-app {
   max-width: none;
@@ -316,6 +316,30 @@ textarea.spatial-card-edit {
 }
 
 /* Paste todos drawer */
+.spatial-search-input {
+  flex: 0 1 12rem;
+  min-width: 0;
+  padding: var(--space-2) var(--space-3);
+  font-size: var(--font-size-base);
+  font-family: inherit;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-default);
+  background: var(--background-default);
+  color: var(--foreground-default);
+}
+.spatial-search-input:focus {
+  outline: 2px solid var(--accent-default);
+  outline-offset: var(--space-1);
+}
+.spatial-search-input::placeholder {
+  color: var(--foreground-muted);
+}
+
+.spatial-card--search-hidden {
+  opacity: 0.25;
+  pointer-events: none;
+}
+
 .spatial-paste-todos-btn {
   flex-shrink: 0;
   padding: var(--space-2) var(--space-4);
@@ -435,4 +459,47 @@ textarea.spatial-card-edit {
 }
 .spatial-drawer-btn--secondary:hover {
   background: var(--background-muted);
+}
+
+/* Undo bar (only visible after delete) */
+.spatial-undo {
+  position: fixed;
+  bottom: var(--space-4);
+  right: var(--space-4);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  background: var(--background-default);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  z-index: 50;
+  font-size: var(--font-size-sm);
+  color: var(--foreground-muted);
+}
+
+.spatial-undo[hidden] {
+  display: none !important;
+}
+
+.spatial-undo-msg {
+  font-size: var(--font-size-sm);
+  color: var(--foreground-muted);
+}
+
+.spatial-undo-btn {
+  flex-shrink: 0;
+  padding: var(--space-1) var(--space-2);
+  font-size: 0.75rem;
+  font-weight: 500;
+  border-radius: var(--radius-sm);
+  background: var(--accent-default);
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+
+.spatial-undo-btn:hover {
+  background: var(--accent-emphasis);
 }

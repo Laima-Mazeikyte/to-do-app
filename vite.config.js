@@ -4,7 +4,7 @@ export default defineConfig({
   envDir: '.',
   build: {
     rollupOptions: {
-      input: ['index.html', 'spatial.html'],
+      input: ['index.html'],
     },
   },
 })

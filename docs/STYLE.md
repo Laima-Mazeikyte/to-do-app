@@ -2,7 +2,7 @@
 
 Token reference and component → CSS class map. Use this when changing styles or adding new UI.
 
-**File locations:** Tokens live in `src/tokens.css`. List-view styles in `src/style.css`, spatial-view styles in `src/spatial.css`.
+**File locations:** Tokens and base styles in `src/tokens.css` and `src/base.css`. Spatial view styles in `src/spatial.css`.
 
 ---
 
@@ -65,44 +65,37 @@ Light theme is the default (`:root` in `tokens.css`). Dark theme overrides seman
 
 ## Component → CSS map
 
-### List view (`src/style.css`)
-
-| Component | Main class | Modifiers / children | Notes |
-|-----------|------------|----------------------|-------|
-| App shell | `.todo-app` | — | Max/min width from tokens |
-| Header | `.todo-header` | `.todo-title`, `.todo-nav-link` | |
-| Add task form | `.todo-form` | `.todo-label`, `.todo-input`, `.todo-submit` | |
-| Filters | `.todo-filters` | `.todo-filter`, `.todo-filter--active` | Tablist |
-| Error message | `.todo-error` | — | role="alert" |
-| Zones container | `.todo-zones` | — | 3-column grid |
-| Zone (priority / pile / done) | `.todo-zone` | `.todo-zone-title`, `.todo-list`, `.todo-zone-empty` | |
-| Task card | `.todo-card` | `.todo-card--done`, `.todo-card--pinned`, `.todo-card--spawn` | |
-| Card internals | — | `.todo-card-controls`, `.todo-card-checkbox`, `.todo-card-text`, `.todo-card-delete` | |
-| Card edit mode | — | `.todo-card-edit-wrap`, `.todo-card-edit`, `.todo-card-save` | |
-| Undo bar | `.todo-undo` | `.todo-undo-button` | Shown after delete |
-
 ### Spatial view (`src/spatial.css`)
 
 | Component | Main class | Modifiers / children | Notes |
 |-----------|------------|----------------------|-------|
 | App shell | `.spatial-app` | — | Full width |
-| Header | `.spatial-header` | `.spatial-form`, `.spatial-input`, `.spatial-submit`, `.spatial-nav-link` | |
+| Header | `.spatial-header` | `.spatial-form`, `.spatial-input`, `.spatial-submit`, `.spatial-paste-todos-btn`, `.spatial-search-input` | |
 | Drop zones | `.spatial-drop-zone` | `.spatial-drop-zone--done`, `.spatial-drop-zone--delete`, `.spatial-drop-zone-count` | |
 | Stage | `.spatial-stage` | — | Physics canvas area |
-| Card (physics) | `.spatial-card` | `.spatial-card--done`, `.spatial-card--editing`, `.spatial-card--over-done`, `.spatial-card--over-delete` | |
+| Card (physics) | `.spatial-card` | `.spatial-card--done`, `.spatial-card--editing`, `.spatial-card--over-done`, `.spatial-card--over-delete`, `.spatial-card--search-hidden` | |
 | Card internals | — | `.spatial-card-inner`, `.spatial-card-handle`, `.spatial-card-controls`, `.spatial-card-text`, edit/save classes | |
-| Paste drawer | `.spatial-drawer-backdrop`, `.spatial-drawer` | `.spatial-drawer-title`, `.spatial-drawer-hint`, `.spatial-drawer-textarea`, `.spatial-drawer-actions`, `.spatial-drawer-btn--primary` / `--secondary` | `.is-open` toggles visibility |
+| Undo bar | `.spatial-undo` | `.spatial-undo-msg`, `.spatial-undo-btn` | Shown after delete |
 
-### Shared
+### Paste drawer
+
+| Component | Main class | Modifiers / children | Notes |
+|-----------|------------|----------------------|-------|
+| Backdrop | `.spatial-drawer-backdrop` | `.is-open` | |
+| Drawer | `.spatial-drawer` | `.spatial-drawer-title`, `.spatial-drawer-hint`, `.spatial-drawer-textarea`, `.spatial-drawer-actions`, `.spatial-drawer-btn--primary` / `--secondary` | `.is-open` toggles visibility |
+
+### Shared (`src/base.css`)
 
 | Component | Class | File |
 |-----------|--------|------|
-| Screen reader only | `.sr-only` | style.css |
+| Screen reader only | `.sr-only` | base.css |
+| Auth header | `.spatial-auth-header`, `.auth-header-btn`, `.auth-header-email`, `.auth-header-signout` | base.css |
+| Auth modal | `.auth-modal-backdrop`, `.auth-modal`, etc. | base.css |
 
 ---
 
 ## Adding new styles
 
 1. Prefer semantic tokens (e.g. `var(--background-muted)`) over primitives.
-2. Use BEM-like naming: block `todo-card`, modifier `todo-card--done`.
+2. Use BEM-like naming: block `spatial-card`, modifier `spatial-card--editing`.
 3. Add new component entries to the tables above and keep STYLE.md in sync.
