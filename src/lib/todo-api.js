@@ -1,4 +1,4 @@
-import { supabase } from './supabase.js'
+import { supabase, ensureSession } from './supabase.js'
 
 /**
  * @param {import('@supabase/supabase-js').Row} row
@@ -21,9 +21,7 @@ export async function loadTasks() {
   if (!supabase) {
     return { data: [], error: null }
   }
-  const {
-    data: { user }
-  } = await supabase.auth.getUser()
+  const user = await ensureSession()
   if (!user) {
     return { data: [], error: 'Not authenticated. Ensure session before loading todos.' }
   }
