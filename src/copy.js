@@ -15,10 +15,9 @@ export const COPY = {
   /** Undo bar: bulk clear – many. {{count}} = number of tasks cleared */
   undoBulkClearMany: 'Removed {{count}} to-dos.',
 
-  /** Empty state: no tasks at all (filter: All). Prefix before the clickable trigger. */
-  emptyAllPrefix: 'Start by adding a to-do or',
-  /** Empty state: clickable trigger that opens the Paste to-dos drawer */
-  emptyAllPasteTrigger: 'paste a to-do list',
+  /** Empty state: no tasks at all (filter: All) */
+  emptyAllPrefix: 'Add a to-do or paste a list',
+
 
   /** Empty state: no to-do tasks (filter: To do) */
   emptyTodo: 'All done! Nothing left to do!',
@@ -36,7 +35,7 @@ export const COPY = {
   copySuccess: 'Copied successfully',
 
   /** More menu: Paste to-dos item */
-  morePaste: 'Paste to-dos',
+  morePaste: 'Paste to-do list',
 
   /** More menu: Copy to-dos item */
   moreCopy: 'Copy to-dos',

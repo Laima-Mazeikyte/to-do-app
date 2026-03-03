@@ -48,8 +48,12 @@
   flex: none;
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: flex-start;
   gap: var(--space-3);
+  width: 100%;
+  max-width: 600px;
+  min-width: 0;
+  box-sizing: border-box;
 }
 
 .spatial-top-right {
@@ -67,12 +71,15 @@
   align-items: center;
   gap: var(--space-2);
   flex-wrap: wrap;
+  width: 100%;
 }
 
+#spatial-todo-form.spatial-form--add,
 .spatial-form--add {
   flex: 1;
   min-width: 0;
-  max-width: 20rem;
+  max-width: 600px;
+  width: 100%;
 }
 
 /* Header controls: unified height for add input, search, more button */
@@ -89,7 +96,7 @@
   box-sizing: border-box;
   border-radius: 9999px;
   border: 1px solid var(--border-default);
-  background: var(--background-default);
+  background: transparent;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
   overflow: hidden;
 }
@@ -153,14 +160,22 @@
   height: var(--header-control-height);
 }
 .spatial-btn-circle--more {
-  background: var(--background-default);
+  background: unset;
+  background-color: unset;
   color: var(--foreground-muted);
   border: 1px solid var(--border-default);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
 }
 .spatial-btn-circle--more:hover {
   color: var(--foreground-default);
-  background: var(--background-muted);
+  background: unset;
+  background-color: unset;
+}
+.spatial-btn-circle--more:focus,
+.spatial-btn-circle--more:focus-visible,
+.spatial-btn-circle--more[aria-expanded="true"] {
+  outline: 2px solid var(--accent-default);
+  outline-offset: 2px;
 }
 
 .spatial-gravity-toggle {
@@ -452,12 +467,53 @@ html.dark .spatial-app[data-bg="sage"] {
   to { opacity: 1; transform: translateY(0); }
 }
 
-/* Filter chips - larger padding */
+/* Filter chips + Remove all on same row, left-aligned with input */
+.spatial-filters-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+  width: 100%;
+}
 .spatial-filters {
   display: flex;
   gap: var(--space-2);
   flex-wrap: wrap;
-  justify-content: center;
+  align-items: center;
+}
+/* Paste chip – same look as filter chips, aligned right */
+.spatial-paste-chip {
+  margin-left: auto;
+  padding: var(--space-2) var(--space-3);
+  font-size: 0.8125rem;
+  font-family: inherit;
+  border-radius: 9999px;
+  border: 1px solid var(--border-default);
+  background: unset;
+  background-color: unset;
+  color: var(--foreground-muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+.spatial-paste-chip:hover {
+  color: var(--foreground-default);
+  background: unset;
+  background-color: unset;
+}
+.spatial-paste-chip-text {
+  order: 1;
+}
+.spatial-paste-chip-icon {
+  order: 2;
+  display: flex;
+  align-items: center;
+  color: var(--foreground-muted);
+}
+.spatial-paste-chip-icon svg {
+  display: block;
 }
 .spatial-filter-chip {
   padding: var(--space-2) var(--space-3);
@@ -465,7 +521,8 @@ html.dark .spatial-app[data-bg="sage"] {
   font-family: inherit;
   border-radius: 9999px;
   border: 1px solid var(--border-default);
-  background: var(--background-default);
+  background: unset;
+  background-color: unset;
   color: var(--foreground-muted);
   cursor: pointer;
   display: flex;
@@ -474,7 +531,8 @@ html.dark .spatial-app[data-bg="sage"] {
 }
 .spatial-filter-chip:hover {
   color: var(--foreground-default);
-  background: var(--background-muted);
+  background: unset;
+  background-color: unset;
 }
 .spatial-filter-chip--active {
   background: var(--accent-default);
@@ -484,6 +542,10 @@ html.dark .spatial-app[data-bg="sage"] {
 .spatial-filter-chip--active:hover {
   background: var(--accent-emphasis);
   color: white;
+}
+.spatial-filter-count {
+  opacity: 0.8;
+  font-variant-numeric: tabular-nums;
 }
 
 /* Tertiary button – subtle, low emphasis */
@@ -518,10 +580,6 @@ html.dark .spatial-app[data-bg="sage"] {
   z-index: 1;
 }
 
-.spatial-empty-state--interactive {
-  pointer-events: auto;
-}
-
 .spatial-empty-state[hidden] {
   display: none;
 }
@@ -535,16 +593,6 @@ html.dark .spatial-app[data-bg="sage"] {
   line-height: 1.5;
 }
 
-.spatial-empty-state-trigger {
-  margin: 0;
-  font: inherit;
-}
-
-.spatial-empty-state-trigger:focus {
-  outline: 2px solid var(--accent-default);
-  outline-offset: 2px;
-}
-
 /* Search input - top right, with clear button */
 .spatial-search-wrap {
   display: flex;
@@ -555,7 +603,8 @@ html.dark .spatial-app[data-bg="sage"] {
   box-sizing: border-box;
   border-radius: 9999px;
   border: 1px solid var(--border-default);
-  background: var(--background-default);
+  background: unset;
+  background-color: unset;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
   overflow: hidden;
 }

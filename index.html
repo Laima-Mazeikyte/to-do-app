@@ -42,12 +42,20 @@
               </div>
             </form>
           </div>
-          <div class="spatial-filters">
-            <button type="button" class="spatial-filter-chip spatial-filter-chip--active" data-filter="all">All</button>
-            <button type="button" class="spatial-filter-chip" data-filter="todo">To do</button>
-            <button type="button" class="spatial-filter-chip" data-filter="done">Done</button>
+          <div class="spatial-filters-row">
+            <div class="spatial-filters">
+              <button type="button" class="spatial-filter-chip spatial-filter-chip--active" data-filter="all">All <span class="spatial-filter-count" data-count="all">0</span></button>
+              <button type="button" class="spatial-filter-chip" data-filter="todo">To do <span class="spatial-filter-count" data-count="todo">0</span></button>
+              <button type="button" class="spatial-filter-chip" data-filter="done">Done <span class="spatial-filter-count" data-count="done">0</span></button>
+              <button type="button" id="spatial-clear-done-btn" class="spatial-btn-clear-done spatial-btn--tertiary" aria-label="Clear all visible tasks" hidden>Remove all</button>
+            </div>
+            <button type="button" id="spatial-paste-btn" class="spatial-paste-chip" aria-label="Open paste to-dos drawer">
+              <span class="spatial-paste-chip-text">Paste to-dos</span>
+              <span class="spatial-paste-chip-icon" aria-hidden="true">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/></svg>
+              </span>
+            </button>
           </div>
-          <button type="button" id="spatial-clear-done-btn" class="spatial-btn-clear-done spatial-btn--tertiary" aria-label="Clear all visible tasks" hidden>Clear all</button>
         </div>
         <div class="spatial-top-right">
           <label for="spatial-search-input" class="sr-only">Search tasks</label>
@@ -63,8 +71,8 @@
             <button type="button" id="spatial-search-clear" class="spatial-search-clear" aria-label="Clear search" hidden>×</button>
           </div>
           <div class="spatial-more-wrap">
-            <button type="button" id="spatial-more-btn" class="spatial-btn-circle spatial-btn-circle--more" aria-label="More options" aria-haspopup="menu" aria-expanded="false">
-              <span aria-hidden="true">⋮</span>
+            <button type="button" id="spatial-more-btn" class="spatial-btn-circle spatial-btn-circle--more" aria-label="Settings" aria-haspopup="menu" aria-expanded="false">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
             </button>
             <div id="spatial-copy-toast" class="spatial-copy-toast" role="status" aria-live="polite" hidden>
               <span class="spatial-copy-toast-icon" aria-hidden="true">
@@ -73,12 +81,6 @@
               <span id="spatial-copy-toast-text" class="spatial-copy-toast-text">Copied successfully</span>
             </div>
             <div id="spatial-more-menu" class="spatial-more-menu" role="menu" hidden>
-              <button type="button" class="spatial-more-item spatial-more-item--with-icon" role="menuitem" data-action="paste">
-                <span class="spatial-more-item-icon" aria-hidden="true">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/></svg>
-                </span>
-                <span class="spatial-more-item-text" data-copy="morePaste">Paste to-dos</span>
-              </button>
               <button type="button" class="spatial-more-item spatial-more-item--with-icon" role="menuitem" data-action="copy">
                 <span class="spatial-more-item-icon" aria-hidden="true">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>

@@ -48,8 +48,6 @@ Features afterwards
 The app uses a single spatial view as the main entry:
 
 - **Physics-based pile**: Cards fall and stack in a pile. Drag by the handle to move.
-- **Done zone**: Drag a card to mark as done (card leaves the pile).
-- **Delete zone**: Drag a card to delete. Undo bar appears for 5 seconds.
 - **Add task**: Form in header or paste a list via "Paste todos" button.
 - **Search**: Filter cards in the pile by text match; non-matching cards are dimmed.
 - **Edit**: Click or double-click card text to edit.

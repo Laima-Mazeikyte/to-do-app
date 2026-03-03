@@ -24,7 +24,7 @@ const CARD_MIN_HEIGHT = 44
 const CARD_MAX_HEIGHT = 120
 const FLOOR_HEIGHT = 60
 const SPAWN_Y = 72
-const GRAVITY = 0.8
+const GRAVITY = 1.2
 const GRID_GAP = 16
 const CLEANUP_STORAGE_KEY = 'spatial-cleanup-mode'
 
@@ -140,11 +140,26 @@ export function initSpatialView(supabase, options = {}) {
   }
 
   function updateFilterHint() {
-    if (!clearDoneBtn) return
-    const visible = getVisibleTasks()
-    const show = visible.length > 0
-    clearDoneBtn.textContent = COPY.clearVisibleButton
-    clearDoneBtn.hidden = !show
+    if (clearDoneBtn) {
+      const visible = getVisibleTasks()
+      const show = visible.length > 0
+      clearDoneBtn.textContent = COPY.clearVisibleButton
+      clearDoneBtn.hidden = !show
+    }
+    updateFilterCounts()
+  }
+
+  function updateFilterCounts() {
+    const all = state.tasks.length
+    const todo = state.tasks.filter((t) => !t.done).length
+    const done = state.tasks.filter((t) => t.done).length
+    filterChips.forEach((chip) => {
+      const countEl = chip.querySelector('.spatial-filter-count[data-count]')
+      if (!countEl) return
+      const filter = chip.dataset.filter
+      const n = filter === 'all' ? all : filter === 'todo' ? todo : done
+      countEl.textContent = String(n)
+    })
   }
 
   function clearVisibleTasks() {
@@ -224,24 +239,14 @@ export function initSpatialView(supabase, options = {}) {
 
     if (state.loading || visible.length > 0) {
       emptyStateEl.hidden = true
-      emptyStateEl.classList.remove('spatial-empty-state--interactive')
       return
     }
 
     const isInteractiveEmpty = !hasSearch && filterMode === 'all'
 
     if (isInteractiveEmpty) {
-      emptyStateEl.classList.add('spatial-empty-state--interactive')
-      emptyStateTextEl.textContent = ''
-      emptyStateTextEl.appendChild(document.createTextNode(COPY.emptyAllPrefix))
-      const trigger = document.createElement('button')
-      trigger.type = 'button'
-      trigger.className = 'spatial-empty-state-trigger spatial-btn--tertiary'
-      trigger.textContent = COPY.emptyAllPasteTrigger
-      trigger.setAttribute('aria-label', 'Open paste to-dos drawer')
-      emptyStateTextEl.appendChild(trigger)
+      emptyStateTextEl.textContent = COPY.emptyAllPrefix
     } else {
-      emptyStateEl.classList.remove('spatial-empty-state--interactive')
       let text
       if (hasSearch) {
         text = COPY.emptySearch.replace('{{query}}', searchQuery)
@@ -292,6 +297,8 @@ export function initSpatialView(supabase, options = {}) {
     const floorY = footerTopY + FLOOR_HEIGHT / 2
     floor = Bodies.rectangle(floorX, floorY, Math.max(rect.width + 2, 4000), FLOOR_HEIGHT, {
       isStatic: true,
+      restitution: 0.55,
+      friction: 0.2,
       render: { visible: false }
     })
     World.add(engine.world, floor)
@@ -397,8 +404,8 @@ export function initSpatialView(supabase, options = {}) {
 
   function createCardBody(x, y, width, height) {
     const body = Bodies.rectangle(x, y, width, height, {
-      restitution: 0.2,
-      friction: 0.4,
+      restitution: 0.55,
+      friction: 0.3,
       frictionAir: 0.01,
       density: 0.002
     })
@@ -750,7 +757,11 @@ export function initSpatialView(supabase, options = {}) {
     const bottomExtent = getBodyBottomExtent(body)
     const maxY = footerTopY - bottomExtent
     const x = Math.max(halfW, Math.min(rect.width - halfW, body.position.x))
-    const y = Math.max(bottomExtent, Math.min(maxY, body.position.y))
+    // Skip Y clamp when bouncing up – let the bounce play out before constraining
+    const y =
+      body.velocity.y < -1
+        ? body.position.y
+        : Math.max(bottomExtent, Math.min(maxY, body.position.y))
     if (x !== body.position.x || y !== body.position.y) {
       Body.setPosition(body, { x, y })
     }
@@ -1364,13 +1375,9 @@ export function initSpatialView(supabase, options = {}) {
   setupCleanupToggle()
   setupMoreMenu()
 
-  if (emptyStateEl) {
-    emptyStateEl.addEventListener('click', (e) => {
-      if (e.target.matches('.spatial-empty-state-trigger')) {
-        e.preventDefault()
-        openPasteDrawer()
-      }
-    })
+  const pasteBtn = document.getElementById('spatial-paste-btn')
+  if (pasteBtn) {
+    pasteBtn.addEventListener('click', () => openPasteDrawer())
   }
 
   window.addEventListener('resize', handleResize)
