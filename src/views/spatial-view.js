@@ -8,6 +8,7 @@ import {
 } from '../lib/todo-api.js'
 import { parsePastedList } from '../paste-list-parser.js'
 import { COPY } from '../copy.js'
+import { getTheme, setTheme } from '../lib/theme.js'
 
 const Engine = Matter.Engine
 const World = Matter.World
@@ -944,6 +945,12 @@ export function initSpatialView(supabase, options = {}) {
       refreshMoreMenuAuth()
     }
 
+    // Sync theme pill active state
+    const currentTheme = getTheme()
+    moreMenu.querySelectorAll('.spatial-more-theme').forEach((btn) => {
+      btn.classList.toggle('spatial-more-theme--active', btn.dataset.theme === currentTheme)
+    })
+
     // Restore background preference (migrate old values to warm)
     const VALID_THEMES = ['warm', 'sand', 'lavender', 'sage']
     const savedBg = localStorage.getItem('spatial-bg')
@@ -978,6 +985,16 @@ export function initSpatialView(supabase, options = {}) {
         if (action === 'paste') openPasteDrawer()
         if (action === 'signin') authOpts?.openAuthModal()
         if (action === 'signout') await authOpts?.signOut()
+      })
+    })
+    moreMenu.querySelectorAll('.spatial-more-theme').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const theme = btn.dataset.theme
+        if (!theme) return
+        setTheme(/** @type {'light' | 'dark' | 'system'} */ (theme))
+        moreMenu.querySelectorAll('.spatial-more-theme').forEach((b) => {
+          b.classList.toggle('spatial-more-theme--active', b.dataset.theme === theme)
+        })
       })
     })
     moreMenu.querySelectorAll('.spatial-more-color').forEach((btn) => {

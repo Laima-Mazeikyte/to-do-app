@@ -180,7 +180,7 @@
   position: absolute;
   top: calc(100% + var(--space-1));
   right: 0;
-  min-width: 10rem;
+  min-width: 14rem;
   padding: var(--space-1);
   background: var(--background-default);
   border: 1px solid var(--border-default);
@@ -235,6 +235,38 @@
   color: var(--foreground-muted);
 }
 
+.spatial-more-themes {
+  display: flex;
+  gap: var(--space-1);
+  padding: 0 var(--space-3) var(--space-2);
+  flex-wrap: wrap;
+  width: fit-content;
+}
+.spatial-more-theme {
+  padding: var(--space-1) var(--space-2);
+  font-size: var(--font-size-sm);
+  font-family: inherit;
+  text-align: center;
+  background: var(--background-muted);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  color: var(--foreground-default);
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+.spatial-more-theme:hover {
+  background: var(--background-subtle);
+}
+.spatial-more-theme--active {
+  background: var(--accent-default);
+  border-color: var(--accent-default);
+  color: white;
+}
+.spatial-more-theme--active:hover {
+  background: var(--accent-emphasis);
+  border-color: var(--accent-emphasis);
+}
+
 .spatial-more-colors {
   display: flex;
   gap: var(--space-2);
@@ -256,13 +288,13 @@
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 .spatial-more-color[data-color="warm"] { background: var(--colorway-warm-bg-light); }
-.spatial-app.dark .spatial-more-color[data-color="warm"] { background: var(--colorway-warm-bg-dark); }
+html.dark .spatial-more-color[data-color="warm"] { background: var(--colorway-warm-bg-dark); }
 .spatial-more-color[data-color="sand"] { background: var(--colorway-sand-bg-light); }
-.spatial-app.dark .spatial-more-color[data-color="sand"] { background: var(--colorway-sand-bg-dark); }
+html.dark .spatial-more-color[data-color="sand"] { background: var(--colorway-sand-bg-dark); }
 .spatial-more-color[data-color="lavender"] { background: var(--colorway-lavender-bg-light); }
-.spatial-app.dark .spatial-more-color[data-color="lavender"] { background: var(--colorway-lavender-bg-dark); }
+html.dark .spatial-more-color[data-color="lavender"] { background: var(--colorway-lavender-bg-dark); }
 .spatial-more-color[data-color="sage"] { background: var(--colorway-sage-bg-light); }
-.spatial-app.dark .spatial-more-color[data-color="sage"] { background: var(--colorway-sage-bg-dark); }
+html.dark .spatial-more-color[data-color="sage"] { background: var(--colorway-sage-bg-dark); }
 
 .spatial-app[data-bg="warm"] {
   --background-subtle: var(--colorway-warm-bg-light);
@@ -271,7 +303,7 @@
   --accent-default: var(--colorway-warm-accent-light);
   --accent-emphasis: var(--colorway-warm-accent-light-hover);
 }
-.spatial-app.dark[data-bg="warm"] {
+html.dark .spatial-app[data-bg="warm"] {
   --background-subtle: var(--colorway-warm-bg-dark);
   --done-card-bg: var(--colorway-warm-done-bg-dark);
   --card-border: var(--colorway-warm-card-border-dark);
@@ -285,7 +317,7 @@
   --accent-default: var(--colorway-sand-accent-light);
   --accent-emphasis: var(--colorway-sand-accent-light-hover);
 }
-.spatial-app.dark[data-bg="sand"] {
+html.dark .spatial-app[data-bg="sand"] {
   --background-subtle: var(--colorway-sand-bg-dark);
   --done-card-bg: var(--colorway-sand-done-bg-dark);
   --card-border: var(--colorway-sand-card-border-dark);
@@ -299,7 +331,7 @@
   --accent-default: var(--colorway-lavender-accent-light);
   --accent-emphasis: var(--colorway-lavender-accent-light-hover);
 }
-.spatial-app.dark[data-bg="lavender"] {
+html.dark .spatial-app[data-bg="lavender"] {
   --background-subtle: var(--colorway-lavender-bg-dark);
   --done-card-bg: var(--colorway-lavender-done-bg-dark);
   --card-border: var(--colorway-lavender-card-border-dark);
@@ -313,7 +345,7 @@
   --accent-default: var(--colorway-sage-accent-light);
   --accent-emphasis: var(--colorway-sage-accent-light-hover);
 }
-.spatial-app.dark[data-bg="sage"] {
+html.dark .spatial-app[data-bg="sage"] {
   --background-subtle: var(--colorway-sage-bg-dark);
   --done-card-bg: var(--colorway-sage-done-bg-dark);
   --card-border: var(--colorway-sage-card-border-dark);

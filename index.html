@@ -5,6 +5,13 @@
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>To-Do</title>
+    <script>
+      (function () {
+        var s = typeof localStorage !== 'undefined' && localStorage.getItem('spatial-theme');
+        var useDark = s === 'dark' || ((s === null || s === 'system') && window.matchMedia('(prefers-color-scheme: dark)').matches);
+        if (useDark) document.documentElement.classList.add('dark');
+      })();
+    </script>
   </head>
   <body>
     <div id="app" class="spatial-app">
@@ -69,6 +76,13 @@
                 </span>
                 <span class="spatial-more-item-text" data-copy="moreCopy">Copy to-dos</span>
               </button>
+              <div class="spatial-more-divider" role="separator"></div>
+              <div class="spatial-more-label" role="presentation" data-copy="moreAppearance">Appearance</div>
+              <div class="spatial-more-themes" role="group" aria-label="Theme">
+                <button type="button" class="spatial-more-theme" data-theme="system" data-copy="themeSystem">System</button>
+                <button type="button" class="spatial-more-theme" data-theme="light" data-copy="themeLight">Light</button>
+                <button type="button" class="spatial-more-theme" data-theme="dark" data-copy="themeDark">Dark</button>
+              </div>
               <div class="spatial-more-divider" role="separator"></div>
               <div class="spatial-more-label" role="presentation" data-copy="moreBackground">Background color</div>
               <div class="spatial-more-colors" role="group" aria-label="Background color">

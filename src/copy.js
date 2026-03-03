@@ -41,6 +41,18 @@ export const COPY = {
   /** More menu: Copy to-dos item */
   moreCopy: 'Copy to-dos',
 
+  /** More menu: Appearance section label */
+  moreAppearance: 'Appearance',
+
+  /** More menu: Theme option – follow system preference */
+  themeSystem: 'System',
+
+  /** More menu: Theme option – light mode */
+  themeLight: 'Light',
+
+  /** More menu: Theme option – dark mode */
+  themeDark: 'Dark',
+
   /** More menu: Background color section label */
   moreBackground: 'Background color',
 

@@ -1,6 +1,9 @@
 import './base.css'
 import './spatial.css'
+import { initTheme } from './lib/theme.js'
 import { supabase, ensureSession } from './lib/supabase.js'
+
+initTheme()
 import { getAuthState, signIn, signUp, signOut, onAuthStateChange } from './lib/auth.js'
 import { createAuthModal } from './components/auth-modal.js'
 import { initSpatialView } from './views/spatial-view.js'

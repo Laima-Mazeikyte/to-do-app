@@ -140,6 +140,7 @@
 
 /* Dark theme: semantic overrides */
 .dark {
+  color-scheme: dark;
   --background-default: var(--color-gray-950);
   --background-subtle: var(--color-gray-900);
   --background-muted: var(--color-gray-800);
