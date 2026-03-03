@@ -120,6 +120,7 @@
 
   /* ----- Primitives: typography ----- */
   --font-sans: system-ui, Avenir, Helvetica, Arial, sans-serif;
+  --font-seaweed: 'Seaweed Script', cursive;
   --font-size-sm: 0.875rem;
   --font-size-base: 1rem;
   --font-size-lg: 1.125rem;
@@ -172,7 +173,7 @@
   --background-muted: var(--color-gray-800);
 
   --foreground-default: var(--color-gray-50);
-  --foreground-muted: var(--color-gray-400);
+  --foreground-muted: var(--color-gray-100);
 
   --border-default: var(--color-gray-800);
   --border-muted: var(--color-gray-900);

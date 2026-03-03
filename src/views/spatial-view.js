@@ -59,8 +59,6 @@ export function initSpatialView(supabase, options = {}) {
   const emptyStateTextEl = document.getElementById('spatial-empty-state-text')
   const moreBtn = document.getElementById('spatial-more-btn')
   const moreMenu = document.getElementById('spatial-more-menu')
-  const copyToastEl = document.getElementById('spatial-copy-toast')
-  const copyToastTextEl = document.getElementById('spatial-copy-toast-text')
   const appEl = document.getElementById('app')
   const cleanupToggleEl = document.getElementById('spatial-cleanup-toggle')
   const gravityLabelEl = document.getElementById('spatial-gravity-label')
@@ -87,9 +85,6 @@ export function initSpatialView(supabase, options = {}) {
     typeof localStorage !== 'undefined' && localStorage.getItem(CLEANUP_STORAGE_KEY) === 'true'
   /** @type {Map<string, { x: number, y: number }>} Stored positions for cleanup mode (persists across filter changes) */
   const cleanupPositions = new Map()
-  /** @type {number | undefined} */
-  let copyToastTimeout
-
   function getStageRect() {
     return stageEl.getBoundingClientRect()
   }
@@ -259,30 +254,6 @@ export function initSpatialView(supabase, options = {}) {
     }
 
     emptyStateEl.hidden = false
-  }
-
-  async function copyVisibleTodosAsMarkdown() {
-    const visible = getVisibleTasks()
-    const lines = visible.map((t) => (t.done ? `- [x] ${t.text}` : `- [ ] ${t.text}`))
-    const text = lines.join('\n')
-    if (text) {
-      try {
-        await navigator.clipboard.writeText(text)
-        showCopyToast()
-      } catch {
-        showError('Could not copy to clipboard')
-      }
-    }
-  }
-
-  function showCopyToast() {
-    if (!copyToastEl || !copyToastTextEl) return
-    copyToastTextEl.textContent = COPY.copySuccess
-    copyToastEl.hidden = false
-    window.clearTimeout(copyToastTimeout)
-    copyToastTimeout = window.setTimeout(() => {
-      copyToastEl.hidden = true
-    }, 2000)
   }
 
   function initPhysics() {
@@ -1258,8 +1229,6 @@ export function initSpatialView(supabase, options = {}) {
         const action = item.dataset.action
         moreMenu.hidden = true
         moreBtn?.setAttribute('aria-expanded', 'false')
-        if (action === 'copy') copyVisibleTodosAsMarkdown()
-        if (action === 'paste') openPasteDrawer()
         if (action === 'signin') authOpts?.openAuthModal()
         if (action === 'signout') await authOpts?.signOut()
       })

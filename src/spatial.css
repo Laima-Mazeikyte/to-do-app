@@ -586,11 +586,12 @@ html.dark .spatial-app[data-bg="sage"] {
 
 .spatial-empty-state-text {
   margin: 0;
-  font-size: var(--font-size-base);
-  color: var(--foreground-muted);
+  font-family: var(--font-seaweed);
+  font-size: 2.5rem;
+  color: color-mix(in srgb, var(--done-card-text) 22%, var(--background-subtle));
   text-align: center;
-  max-width: 20rem;
-  line-height: 1.5;
+  max-width: 24rem;
+  line-height: 1.3;
 }
 
 /* Search input - top right, with clear button */
@@ -956,8 +957,9 @@ textarea.spatial-card-edit {
 }
 
 .spatial-drawer-empty {
-  font-size: var(--font-size-sm);
-  color: var(--foreground-muted);
+  font-family: var(--font-seaweed);
+  font-size: 1.75rem;
+  color: color-mix(in srgb, var(--done-card-text) 22%, var(--background-default));
   flex-shrink: 0;
 }
 

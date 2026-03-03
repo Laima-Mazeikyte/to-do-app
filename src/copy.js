@@ -20,7 +20,7 @@ export const COPY = {
 
 
   /** Empty state: no to-do tasks (filter: To do) */
-  emptyTodo: 'All done! Nothing left to do!',
+  emptyTodo: 'Nothing left to do!',
 
   /** Empty state: no done tasks (filter: Done) */
   emptyDone: 'No completed to-dos yet.',
@@ -30,15 +30,6 @@ export const COPY = {
 
   /** Paste drawer: shown when user tries to add with no text pasted */
   pasteDrawerEmpty: 'Nothing to add—paste your list first.',
-
-  /** More menu: Copy to-dos success toast */
-  copySuccess: 'Copied successfully',
-
-  /** More menu: Paste to-dos item */
-  morePaste: 'Paste to-do list',
-
-  /** More menu: Copy to-dos item */
-  moreCopy: 'Copy to-dos',
 
   /** More menu: Appearance section label */
   moreAppearance: 'Appearance',
