@@ -8,8 +8,20 @@ import { initSpatialView } from './views/spatial-view.js'
 ;(async () => {
   if (supabase) await ensureSession()
 
-  const spatialView = initSpatialView(supabase)
+  const spatialView = initSpatialView(supabase, {
+    auth: supabase
+      ? {
+          openAuthModal: () => authModal?.open(),
+          signOut: async () => {
+            await signOut()
+            await ensureSession()
+          },
+          getAuthState
+        }
+      : undefined
+  })
   const reloadTasks = spatialView?.reloadTasks ?? (() => {})
+  const refreshMoreMenuAuth = spatialView?.refreshMoreMenuAuth ?? (async () => {})
 
   /** Wait for layout to settle after DOM changes (e.g. auth header update). */
   function waitForLayout() {
@@ -60,6 +72,7 @@ import { initSpatialView } from './views/spatial-view.js'
       authHeaderEl.appendChild(emailSpan)
       authHeaderEl.appendChild(signOutBtn)
     }
+    await refreshMoreMenuAuth()
   }
 
   if (supabase) {

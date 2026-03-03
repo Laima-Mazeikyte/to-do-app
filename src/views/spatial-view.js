@@ -30,8 +30,10 @@ const GRAVITY = 0.8
 /**
  * Initialize the spatial (physics) view. Sets up DOM refs, physics, paste drawer, filters, and event listeners.
  * @param {import('@supabase/supabase-js').SupabaseClient | null} supabase
+ * @param {{ auth?: { openAuthModal: () => void, signOut: () => Promise<void>, getAuthState: () => Promise<{ user: object | null, isAnonymous: boolean }> } }} [options]
  */
-export function initSpatialView(supabase) {
+export function initSpatialView(supabase, options = {}) {
+  const authOpts = options.auth
   const form = document.getElementById('spatial-todo-form')
   const input = document.getElementById('spatial-todo-input')
   const errorEl = document.getElementById('spatial-error')
@@ -44,8 +46,10 @@ export function initSpatialView(supabase) {
   const pasteDrawerCreate = document.getElementById('spatial-paste-drawer-create')
   const pasteDrawerCancel = document.getElementById('spatial-paste-drawer-cancel')
   const undoBarEl = document.getElementById('spatial-undo-bar')
+  const undoTimerEl = document.getElementById('spatial-undo-timer')
   const undoMsgEl = document.getElementById('spatial-undo-msg')
   const undoBtnEl = document.getElementById('spatial-undo-btn')
+  const undoDismissEl = document.getElementById('spatial-undo-dismiss')
   const searchInputEl = document.getElementById('spatial-search-input')
   const filterChips = document.querySelectorAll('.spatial-filter-chip')
   const clearDoneBtn = document.getElementById('spatial-clear-done-btn')
@@ -53,6 +57,9 @@ export function initSpatialView(supabase) {
   const emptyStateTextEl = document.getElementById('spatial-empty-state-text')
   const moreBtn = document.getElementById('spatial-more-btn')
   const moreMenu = document.getElementById('spatial-more-menu')
+  const copyToastEl = document.getElementById('spatial-copy-toast')
+  const copyToastTextEl = document.getElementById('spatial-copy-toast-text')
+  const appEl = document.getElementById('app')
 
   let engine = null
   let floor = null
@@ -69,6 +76,8 @@ export function initSpatialView(supabase) {
   let pendingBulkClear = null
   /** @type {FilterMode} */
   let filterMode = 'all'
+  /** @type {number | undefined} */
+  let copyToastTimeout
 
   function getStageRect() {
     return stageEl.getBoundingClientRect()
@@ -113,15 +122,15 @@ export function initSpatialView(supabase) {
 
   function updateFilterHint() {
     if (!clearDoneBtn) return
-    const doneCount = state.tasks.filter((t) => t.done).length
-    const show = (filterMode === 'all' || filterMode === 'done') && doneCount > 0
-    clearDoneBtn.textContent = COPY.clearDoneButton
+    const visible = getVisibleTasks()
+    const show = visible.length > 0
+    clearDoneBtn.textContent = COPY.clearVisibleButton
     clearDoneBtn.hidden = !show
   }
 
-  function clearDoneTasks() {
-    const doneTasks = state.tasks.filter((t) => t.done)
-    if (doneTasks.length === 0) return
+  function clearVisibleTasks() {
+    const visibleTasks = getVisibleTasks()
+    if (visibleTasks.length === 0) return
 
     if (pendingDelete) {
       window.clearTimeout(pendingDelete.timerId)
@@ -144,7 +153,7 @@ export function initSpatialView(supabase) {
       pendingBulkClear = null
     }
 
-    for (const task of doneTasks) {
+    for (const task of visibleTasks) {
       const entry = cardMap.get(task.id)
       if (entry) {
         World.remove(engine.world, entry.body)
@@ -157,12 +166,13 @@ export function initSpatialView(supabase) {
       finalizeBulkClear()
     }, DELETE_UNDO_MS)
 
-    pendingBulkClear = { tasks: doneTasks, timerId }
+    pendingBulkClear = { tasks: visibleTasks, timerId }
     const msg =
-      doneTasks.length === 1
+      visibleTasks.length === 1
         ? COPY.undoBulkClearOne
-        : COPY.undoBulkClearMany.replace('{{count}}', String(doneTasks.length))
+        : COPY.undoBulkClearMany.replace('{{count}}', String(visibleTasks.length))
     if (undoMsgEl) undoMsgEl.textContent = msg
+    restartUndoTimer()
     if (undoBarEl) undoBarEl.hidden = false
 
     syncPileToFilter()
@@ -195,31 +205,60 @@ export function initSpatialView(supabase) {
 
     if (state.loading || visible.length > 0) {
       emptyStateEl.hidden = true
+      emptyStateEl.classList.remove('spatial-empty-state--interactive')
       return
     }
 
-    let text
-    if (hasSearch) {
-      text = COPY.emptySearch.replace('{{query}}', searchQuery)
-    } else if (filterMode === 'all') {
-      text = COPY.emptyAll
-    } else if (filterMode === 'todo') {
-      text = COPY.emptyTodo
+    const isInteractiveEmpty = !hasSearch && filterMode === 'all'
+
+    if (isInteractiveEmpty) {
+      emptyStateEl.classList.add('spatial-empty-state--interactive')
+      emptyStateTextEl.textContent = ''
+      emptyStateTextEl.appendChild(document.createTextNode(COPY.emptyAllPrefix))
+      const trigger = document.createElement('button')
+      trigger.type = 'button'
+      trigger.className = 'spatial-empty-state-trigger spatial-btn--tertiary'
+      trigger.textContent = COPY.emptyAllPasteTrigger
+      trigger.setAttribute('aria-label', 'Open paste to-dos drawer')
+      emptyStateTextEl.appendChild(trigger)
     } else {
-      text = COPY.emptyDone
+      emptyStateEl.classList.remove('spatial-empty-state--interactive')
+      let text
+      if (hasSearch) {
+        text = COPY.emptySearch.replace('{{query}}', searchQuery)
+      } else if (filterMode === 'todo') {
+        text = COPY.emptyTodo
+      } else {
+        text = COPY.emptyDone
+      }
+      emptyStateTextEl.textContent = text
     }
 
-    emptyStateTextEl.textContent = text
     emptyStateEl.hidden = false
   }
 
-  function copyVisibleTodosAsMarkdown() {
+  async function copyVisibleTodosAsMarkdown() {
     const visible = getVisibleTasks()
     const lines = visible.map((t) => (t.done ? `- [x] ${t.text}` : `- [ ] ${t.text}`))
     const text = lines.join('\n')
     if (text) {
-      navigator.clipboard.writeText(text)
+      try {
+        await navigator.clipboard.writeText(text)
+        showCopyToast()
+      } catch {
+        showError('Could not copy to clipboard')
+      }
     }
+  }
+
+  function showCopyToast() {
+    if (!copyToastEl || !copyToastTextEl) return
+    copyToastTextEl.textContent = COPY.copySuccess
+    copyToastEl.hidden = false
+    window.clearTimeout(copyToastTimeout)
+    copyToastTimeout = window.setTimeout(() => {
+      copyToastEl.hidden = true
+    }, 2000)
   }
 
   function initPhysics() {
@@ -355,6 +394,22 @@ export function initSpatialView(supabase) {
     return { halfW: w / 2, halfH: h / 2 }
   }
 
+  /** Sync physics body size to match the card element after content changes (e.g. edit). */
+  function syncBodyToElementSize(element, body) {
+    const w = element.offsetWidth
+    const h = element.offsetHeight
+    const newW = Math.max(CARD_MIN_WIDTH, Math.min(CARD_MAX_WIDTH, w))
+    const newH = Math.max(CARD_MIN_HEIGHT, h)
+    const oldW = body.cardWidth ?? CARD_MAX_WIDTH
+    const oldH = body.cardHeight ?? CARD_MIN_HEIGHT
+    if (Math.abs(newW - oldW) > 0.5 || Math.abs(newH - oldH) > 0.5) {
+      Body.scale(body, newW / oldW, newH / oldH)
+      body.cardWidth = newW
+      body.cardHeight = newH
+      clampBodyToStage(body)
+    }
+  }
+
   /** Vertical extent from body center to bottom edge of rotated rectangle. */
   function getBodyBottomExtent(body) {
     const { halfW, halfH } = getBodyHalfSize(body)
@@ -464,8 +519,10 @@ export function initSpatialView(supabase) {
       element.style.left = body.position.x + 'px'
       element.style.top = body.position.y + 'px'
       element.style.transform = `translate(-50%, -50%) rotate(${body.angle}rad)`
-      // Stack cards by Y so lower cards (higher Y) appear on top, matching the pile
-      element.style.zIndex = String(Math.round(body.position.y))
+      // Stack cards by Y so lower cards (higher Y) appear on top; editing card stays on top via CSS
+      if (!element.classList.contains('spatial-card--editing')) {
+        element.style.zIndex = String(Math.round(body.position.y))
+      }
     }
   }
 
@@ -511,14 +568,23 @@ export function initSpatialView(supabase) {
     if (!ok && error) showError(error)
     const idx = state.tasks.findIndex((t) => t.id === id)
     if (idx !== -1) state.tasks.splice(idx, 1)
+    syncPileToFilter()
   }
 
   function hideUndoBar() {
     if (undoBarEl) undoBarEl.hidden = true
   }
 
+  function restartUndoTimer() {
+    if (!undoTimerEl) return
+    undoTimerEl.style.animation = 'none'
+    undoTimerEl.offsetHeight // force reflow
+    undoTimerEl.style.animation = 'spatial-undo-shrink 5s linear forwards'
+  }
+
   function showUndoBar(taskText) {
     if (undoMsgEl) undoMsgEl.textContent = COPY.undoSingleDelete.replace('{{task}}', taskText)
+    restartUndoTimer()
     if (undoBarEl) undoBarEl.hidden = false
   }
 
@@ -577,6 +643,16 @@ export function initSpatialView(supabase) {
     }
   }
 
+  function handleDismissClick() {
+    if (pendingDelete) {
+      finalizeDelete(pendingDelete.task.id)
+      return
+    }
+    if (pendingBulkClear) {
+      finalizeBulkClear()
+    }
+  }
+
   function startEdit(cardEl, task) {
     const entry = cardMap.get(task.id)
     if (!entry) return
@@ -587,21 +663,14 @@ export function initSpatialView(supabase) {
     const controls = textSpan.parentNode
     if (!controls) return
 
-    const rect = getStageRect()
     const savedX = body.position.x
     const savedY = body.position.y
     Body.setStatic(body, true)
-    Body.setPosition(body, { x: rect.width / 2, y: rect.height / 2 })
     Body.setAngle(body, 0)
 
-    const overlay = document.createElement('div')
-    overlay.className = 'spatial-edit-overlay'
-    overlay.setAttribute('aria-hidden', 'true')
-    stageEl.insertBefore(overlay, stageEl.firstChild)
     cardEl.classList.add('spatial-card--editing')
 
     const exitEditMode = () => {
-      overlay.remove()
       cardEl.classList.remove('spatial-card--editing')
       Body.setPosition(body, { x: savedX, y: savedY })
       Body.setStatic(body, false)
@@ -613,20 +682,18 @@ export function initSpatialView(supabase) {
     editField.className = 'spatial-card-edit'
     editField.value = task.text
     editField.setAttribute('aria-label', 'Edit task')
-    const lineCount = (task.text.match(/\n/g) || []).length + 1
-    editField.rows = Math.max(10, lineCount)
     inputWrap.appendChild(editField)
 
-    const saveBtn = document.createElement('button')
-    saveBtn.type = 'button'
-    saveBtn.className = 'spatial-card-save'
-    saveBtn.textContent = 'Save'
-    saveBtn.setAttribute('aria-label', 'Save changes')
+    const autoResize = () => {
+      editField.style.height = 'auto'
+      editField.style.height = editField.scrollHeight + 'px'
+    }
+    editField.addEventListener('input', autoResize)
+    requestAnimationFrame(() => autoResize(editField))
 
     const editWrap = document.createElement('div')
     editWrap.className = 'spatial-card-edit-wrap'
     editWrap.appendChild(inputWrap)
-    editWrap.appendChild(saveBtn)
 
     controls.replaceChild(editWrap, textSpan)
 
@@ -634,8 +701,8 @@ export function initSpatialView(supabase) {
       const text = editField.value.trim()
       controls.replaceChild(textSpan, editWrap)
       editField.removeEventListener('blur', finishEdit)
+      editField.removeEventListener('input', autoResize)
       editField.removeEventListener('keydown', keydown)
-      saveBtn.removeEventListener('click', onSaveClick)
       exitEditMode()
       if (text) {
         apiSetTaskText(task.id, text).then(({ ok }) => {
@@ -645,15 +712,18 @@ export function initSpatialView(supabase) {
             if (entry) entry.task.text = text
           }
           textSpan.textContent = task.text
+          if (ok) {
+            const entry = cardMap.get(task.id)
+            if (entry) {
+              requestAnimationFrame(() => {
+                syncBodyToElementSize(entry.element, entry.body)
+              })
+            }
+          }
         })
       } else {
         textSpan.textContent = task.text
       }
-    }
-
-    const onSaveClick = (e) => {
-      e.preventDefault()
-      finishEdit()
     }
 
     const keydown = (e) => {
@@ -663,7 +733,7 @@ export function initSpatialView(supabase) {
         finishEdit()
         return
       }
-      if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+      if (e.key === 'Enter' && !e.shiftKey) {
         e.preventDefault()
         e.stopPropagation()
         finishEdit()
@@ -672,7 +742,6 @@ export function initSpatialView(supabase) {
 
     editField.addEventListener('blur', finishEdit)
     editField.addEventListener('keydown', keydown)
-    saveBtn.addEventListener('click', onSaveClick)
     editField.focus()
   }
 
@@ -753,7 +822,7 @@ export function initSpatialView(supabase) {
     if (items.length === 0) {
       if (pasteDrawerEmpty) {
         pasteDrawerEmpty.hidden = false
-        pasteDrawerEmpty.textContent = 'No tasks to add.'
+        pasteDrawerEmpty.textContent = COPY.pasteDrawerEmpty
       }
       return
     }
@@ -771,6 +840,8 @@ export function initSpatialView(supabase) {
       const x = centerX + (Math.random() - 0.5) * 60
       setTimeout(() => addCardToWorld(task, x, SPAWN_Y), i * 120)
     }
+    updateEmptyState()
+    updateFilterHint()
   }
 
   function setFilterMode(mode) {
@@ -792,21 +863,59 @@ export function initSpatialView(supabase) {
       })
     })
     if (clearDoneBtn) {
-      clearDoneBtn.addEventListener('click', () => clearDoneTasks())
+      clearDoneBtn.addEventListener('click', () => clearVisibleTasks())
     }
     if (searchInputEl) {
       searchInputEl.addEventListener('input', () => syncPileToFilter())
     }
   }
 
+  const SIGN_IN_ICON = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>'
+  const SIGN_OUT_ICON = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>'
+
+  async function refreshMoreMenuAuth() {
+    const authSection = moreMenu?.querySelector('#spatial-more-auth')
+    const authBtn = moreMenu?.querySelector('#spatial-more-auth-btn')
+    if (!authSection || !authBtn || !authOpts || !supabase) return
+    const { user, isAnonymous } = await authOpts.getAuthState()
+    const isSignedIn = !!user?.email && !isAnonymous
+    authSection.hidden = false
+    authBtn.dataset.action = isSignedIn ? 'signout' : 'signin'
+    authBtn.setAttribute('aria-label', isSignedIn ? 'Sign out' : 'Sign in or create account')
+    authBtn.querySelector('.spatial-more-item-icon').innerHTML = isSignedIn ? SIGN_OUT_ICON : SIGN_IN_ICON
+    authBtn.querySelector('.spatial-more-item-text').textContent = isSignedIn ? COPY.moreSignOut : COPY.moreSignIn
+  }
+
   function setupMoreMenu() {
     if (!moreBtn || !moreMenu) return
-    moreBtn.addEventListener('click', (e) => {
+
+    // Populate COPY labels
+    moreMenu.querySelectorAll('[data-copy]').forEach((el) => {
+      const key = el.dataset.copy
+      if (key && COPY[key]) el.textContent = COPY[key]
+    })
+
+    // Account section: single button (Sign in or Sign out) based on auth state
+    if (authOpts && supabase) {
+      refreshMoreMenuAuth()
+    }
+
+    // Restore background preference
+    const savedBg = localStorage.getItem('spatial-bg')
+    if (savedBg && appEl) {
+      if (savedBg !== 'default') appEl.dataset.bg = savedBg
+      moreMenu.querySelectorAll('.spatial-more-color').forEach((btn) => {
+        btn.classList.toggle('spatial-more-color--active', btn.dataset.color === savedBg)
+      })
+    }
+
+    moreBtn.addEventListener('click', async (e) => {
       e.preventDefault()
       e.stopPropagation()
       const isOpen = !moreMenu.hidden
-      moreMenu.hidden = !isOpen
+      moreMenu.hidden = isOpen
       moreBtn.setAttribute('aria-expanded', String(!isOpen))
+      if (!isOpen) await refreshMoreMenuAuth()
     })
     document.addEventListener('click', () => {
       moreMenu.hidden = true
@@ -814,35 +923,60 @@ export function initSpatialView(supabase) {
     })
     moreMenu.addEventListener('click', (e) => e.stopPropagation())
     moreMenu.querySelectorAll('.spatial-more-item').forEach((item) => {
-      item.addEventListener('click', () => {
+      item.addEventListener('click', async () => {
         const action = item.dataset.action
         moreMenu.hidden = true
         moreBtn?.setAttribute('aria-expanded', 'false')
         if (action === 'copy') copyVisibleTodosAsMarkdown()
         if (action === 'paste') openPasteDrawer()
+        if (action === 'signin') authOpts?.openAuthModal()
+        if (action === 'signout') await authOpts?.signOut()
+      })
+    })
+    moreMenu.querySelectorAll('.spatial-more-color').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const color = btn.dataset.color
+        if (!color || !appEl) return
+        if (color === 'default') {
+          delete appEl.dataset.bg
+        } else {
+          appEl.dataset.bg = color
+        }
+        localStorage.setItem('spatial-bg', color)
+        moreMenu.querySelectorAll('.spatial-more-color').forEach((b) => {
+          b.classList.toggle('spatial-more-color--active', b.dataset.color === color)
+        })
       })
     })
   }
 
+  /** Prevents duplicate loads/seeds when init and auth both trigger loadInitialTasks. */
+  let loadPromise = null
+
   async function loadInitialTasks() {
-    if (engine) {
-      for (const [, { body, element }] of cardMap) {
-        World.remove(engine.world, body)
-        element.remove()
+    const previous = loadPromise
+    loadPromise = (async () => {
+      if (previous) await previous
+      if (engine) {
+        for (const [, { body, element }] of cardMap) {
+          World.remove(engine.world, body)
+          element.remove()
+        }
+        cardMap.clear()
+        initPhysics()
       }
-      cardMap.clear()
-      initPhysics()
-    }
-    state.loading = true
-    const { data, error } = await apiLoadTasks()
-    if (error) {
-      showError(error)
+      state.loading = true
+      let { data, error } = await apiLoadTasks()
+      if (error) {
+        showError(error)
+        state.loading = false
+        return
+      }
+      state.tasks = data || []
       state.loading = false
-      return
-    }
-    state.tasks = data || []
-    state.loading = false
-    syncPileToFilter()
+      syncPileToFilter()
+    })()
+    await loadPromise
   }
 
   function handleResize() {
@@ -885,9 +1019,21 @@ export function initSpatialView(supabase) {
   if (undoBtnEl) {
     undoBtnEl.addEventListener('click', handleUndoClick)
   }
+  if (undoDismissEl) {
+    undoDismissEl.addEventListener('click', handleDismissClick)
+  }
 
   setupFilters()
   setupMoreMenu()
+
+  if (emptyStateEl) {
+    emptyStateEl.addEventListener('click', (e) => {
+      if (e.target.matches('.spatial-empty-state-trigger')) {
+        e.preventDefault()
+        openPasteDrawer()
+      }
+    })
+  }
 
   window.addEventListener('resize', handleResize)
 
@@ -900,14 +1046,11 @@ export function initSpatialView(supabase) {
   requestAnimationFrame(() => {
     initPhysics()
     runLoop()
-    if (supabase) {
-      loadInitialTasks()
-    } else {
-      state.loading = false
-      syncPileToFilter()
+    loadInitialTasks()
+    if (!supabase) {
       console.info('[To-Do Spatial] No Supabase – add .env and restart to persist.')
     }
   })
 
-  return { reloadTasks: loadInitialTasks }
+  return { reloadTasks: loadInitialTasks, refreshMoreMenuAuth }
 }

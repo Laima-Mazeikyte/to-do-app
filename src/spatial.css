@@ -205,6 +205,139 @@
   background: var(--background-muted);
 }
 
+.spatial-more-item--with-icon {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+.spatial-more-item-icon {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  color: var(--foreground-muted);
+}
+.spatial-more-item-icon svg {
+  display: block;
+}
+
+.spatial-more-divider {
+  height: 1px;
+  margin: var(--space-1) 0;
+  background: var(--border-default);
+}
+
+.spatial-more-label {
+  padding: var(--space-1) var(--space-3) var(--space-2);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--foreground-muted);
+}
+
+.spatial-more-colors {
+  display: flex;
+  gap: var(--space-2);
+  padding: 0 var(--space-3) var(--space-2);
+  flex-wrap: wrap;
+}
+
+.spatial-more-color {
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: var(--radius-md);
+  border: 2px solid var(--border-default);
+  cursor: pointer;
+  padding: 0;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.spatial-more-color:hover {
+  transform: scale(1.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+.spatial-more-color[data-color="default"] { background: var(--color-gray-50); }
+.spatial-app.dark .spatial-more-color[data-color="default"] { background: var(--color-gray-900); }
+.spatial-more-color[data-color="warm"] { background: #fef3e2; }
+.spatial-app.dark .spatial-more-color[data-color="warm"] { background: #3d3528; }
+.spatial-more-color[data-color="cool"] { background: #e8f4fc; }
+.spatial-app.dark .spatial-more-color[data-color="cool"] { background: #1a2d3d; }
+.spatial-more-color[data-color="mint"] { background: #e8f8f0; }
+.spatial-app.dark .spatial-more-color[data-color="mint"] { background: #1a2d26; }
+.spatial-more-color[data-color="lavender"] { background: #f0e8f8; }
+.spatial-app.dark .spatial-more-color[data-color="lavender"] { background: #2d1a3d; }
+.spatial-more-color[data-color="rose"] { background: #fce7f3; }
+.spatial-app.dark .spatial-more-color[data-color="rose"] { background: #3d1a2d; }
+.spatial-more-color[data-color="coral"] { background: #ffe4e1; }
+.spatial-app.dark .spatial-more-color[data-color="coral"] { background: #3d2626; }
+.spatial-more-color[data-color="sky"] { background: #e0f2fe; }
+.spatial-app.dark .spatial-more-color[data-color="sky"] { background: #1a2d3d; }
+.spatial-more-color[data-color="sage"] { background: #ecfdf5; }
+.spatial-app.dark .spatial-more-color[data-color="sage"] { background: #1a2d26; }
+.spatial-more-color[data-color="sand"] { background: #fef7ed; }
+.spatial-app.dark .spatial-more-color[data-color="sand"] { background: #3d3528; }
+.spatial-more-color[data-color="slate"] { background: #f1f5f9; }
+.spatial-app.dark .spatial-more-color[data-color="slate"] { background: #1e293b; }
+
+.spatial-app[data-bg="warm"] { --background-subtle: #fef3e2; }
+.spatial-app.dark[data-bg="warm"] { --background-subtle: #3d3528; }
+.spatial-app[data-bg="cool"] { --background-subtle: #e8f4fc; }
+.spatial-app.dark[data-bg="cool"] { --background-subtle: #1a2d3d; }
+.spatial-app[data-bg="mint"] { --background-subtle: #e8f8f0; }
+.spatial-app.dark[data-bg="mint"] { --background-subtle: #1a2d26; }
+.spatial-app[data-bg="lavender"] { --background-subtle: #f0e8f8; }
+.spatial-app.dark[data-bg="lavender"] { --background-subtle: #2d1a3d; }
+.spatial-app[data-bg="rose"] { --background-subtle: #fce7f3; }
+.spatial-app.dark[data-bg="rose"] { --background-subtle: #3d1a2d; }
+.spatial-app[data-bg="coral"] { --background-subtle: #ffe4e1; }
+.spatial-app.dark[data-bg="coral"] { --background-subtle: #3d2626; }
+.spatial-app[data-bg="sky"] { --background-subtle: #e0f2fe; }
+.spatial-app.dark[data-bg="sky"] { --background-subtle: #1a2d3d; }
+.spatial-app[data-bg="sage"] { --background-subtle: #ecfdf5; }
+.spatial-app.dark[data-bg="sage"] { --background-subtle: #1a2d26; }
+.spatial-app[data-bg="sand"] { --background-subtle: #fef7ed; }
+.spatial-app.dark[data-bg="sand"] { --background-subtle: #3d3528; }
+.spatial-app[data-bg="slate"] { --background-subtle: #f1f5f9; }
+.spatial-app.dark[data-bg="slate"] { --background-subtle: #1e293b; }
+
+.spatial-more-color--active {
+  box-shadow: 0 0 0 2px var(--accent-default);
+}
+
+/* Copy success toast */
+.spatial-copy-toast {
+  position: fixed;
+  bottom: calc(var(--space-4) + 4rem);
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-4);
+  font-size: var(--font-size-sm);
+  color: var(--foreground-default);
+  background: var(--background-default);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+  z-index: 100;
+  animation: spatial-toast-in 0.2s ease;
+}
+.spatial-copy-toast[hidden] {
+  display: none;
+}
+.spatial-copy-toast-icon {
+  flex-shrink: 0;
+  display: flex;
+  color: var(--success-default);
+}
+.spatial-copy-toast-icon svg {
+  display: block;
+}
+@keyframes spatial-toast-in {
+  from { opacity: 0; transform: translateX(-50%) translateY(8px); }
+  to { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+
 /* Filter chips - larger padding */
 .spatial-filters {
   display: flex;
@@ -271,6 +404,10 @@
   z-index: 1;
 }
 
+.spatial-empty-state--interactive {
+  pointer-events: auto;
+}
+
 .spatial-empty-state[hidden] {
   display: none;
 }
@@ -282,6 +419,16 @@
   text-align: center;
   max-width: 20rem;
   line-height: 1.5;
+}
+
+.spatial-empty-state-trigger {
+  margin: 0;
+  font: inherit;
+}
+
+.spatial-empty-state-trigger:focus {
+  outline: 2px solid var(--accent-default);
+  outline-offset: 2px;
 }
 
 /* Search input - top right */
@@ -330,18 +477,15 @@
   min-height: 0;
 }
 
-.spatial-edit-overlay {
-  position: absolute;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.25);
-  z-index: 10000;
-  pointer-events: none;
-}
-
 .spatial-card--editing {
   z-index: 10001;
   pointer-events: auto;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+}
+.spatial-card--editing .spatial-card-inner,
+.spatial-card--editing .spatial-card-controls,
+.spatial-card--editing .spatial-card-edit-wrap {
+  overflow: visible;
 }
 
 .spatial-card {
@@ -409,7 +553,7 @@
 
 .spatial-card-delete {
   flex-shrink: 0;
-  padding: 0 var(--space-2) 0 var(--space-1);
+  padding: 0 var(--space-3) 0 var(--space-2);
   font-size: var(--font-size-sm);
   font-family: inherit;
   border: none;
@@ -428,7 +572,7 @@
   display: flex;
   align-items: center;
   min-width: 0;
-  padding: var(--space-1) var(--space-2) var(--space-1) var(--space-2);
+  padding: var(--space-1) 0 var(--space-1) var(--space-2);
   overflow: hidden;
 }
 
@@ -508,15 +652,20 @@
   font-family: inherit;
   text-align: left;
   border-radius: var(--radius-sm);
-  border: 1px solid var(--accent-default);
+  border: 1px solid var(--border-default);
   background: var(--background-default);
   color: var(--foreground-default);
   box-sizing: border-box;
 }
+.spatial-card-edit:focus {
+  outline: 2px solid var(--accent-default);
+  outline-offset: 2px;
+}
 textarea.spatial-card-edit {
   width: 200px;
   min-height: 2.5em;
-  resize: vertical;
+  overflow-y: hidden;
+  resize: none;
   line-height: 1.4;
 }
 
@@ -539,7 +688,7 @@ textarea.spatial-card-edit {
   position: fixed;
   inset: 0;
   background: rgba(0, 0, 0, 0.4);
-  z-index: 100;
+  z-index: 11000;
   opacity: 0;
   transition: opacity 0.2s ease;
   cursor: pointer;
@@ -552,20 +701,21 @@ textarea.spatial-card-edit {
   position: fixed;
   top: 0;
   right: 0;
+  bottom: 0;
   width: min(400px, 100vw - var(--space-8));
   max-width: 100%;
-  height: 100%;
   background: var(--background-default);
   border-left: 1px solid var(--border-default);
   box-shadow: -4px 0 24px rgba(0, 0, 0, 0.12);
-  z-index: 101;
+  z-index: 11001;
   display: flex;
   flex-direction: column;
   padding: var(--space-6);
+  padding-bottom: max(var(--space-6), env(safe-area-inset-bottom));
   gap: var(--space-4);
   transform: translateX(100%);
   transition: transform 0.25s ease;
-  overflow: auto;
+  overflow: hidden;
 }
 .spatial-drawer.is-open {
   transform: translateX(0);
@@ -576,6 +726,7 @@ textarea.spatial-card-edit {
   font-size: var(--font-size-lg);
   font-weight: 600;
   color: var(--foreground-default);
+  flex-shrink: 0;
 }
 
 .spatial-drawer-hint {
@@ -583,11 +734,13 @@ textarea.spatial-card-edit {
   font-size: var(--font-size-sm);
   color: var(--foreground-muted);
   line-height: 1.4;
+  flex-shrink: 0;
 }
 
 .spatial-drawer-textarea {
-  flex: 1;
-  min-height: 160px;
+  flex: 1 1 0;
+  min-height: 0;
+  width: 100%;
   padding: var(--space-3);
   font-size: var(--font-size-base);
   font-family: inherit;
@@ -596,7 +749,8 @@ textarea.spatial-card-edit {
   border: 1px solid var(--border-default);
   background: var(--background-default);
   color: var(--foreground-default);
-  resize: vertical;
+  resize: none;
+  overflow: auto;
   box-sizing: border-box;
 }
 .spatial-drawer-textarea:focus {
@@ -607,6 +761,7 @@ textarea.spatial-card-edit {
 .spatial-drawer-empty {
   font-size: var(--font-size-sm);
   color: var(--foreground-muted);
+  flex-shrink: 0;
 }
 
 .spatial-drawer-actions {
@@ -640,6 +795,161 @@ textarea.spatial-card-edit {
   background: var(--background-muted);
 }
 
+/* Auth drawer: uses same drawer styles as paste drawer */
+body.auth-drawer-open {
+  overflow: hidden;
+}
+
+.auth-drawer-choice,
+.auth-drawer-form-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  flex: 1 1 0;
+  min-height: 0;
+}
+
+.auth-drawer-choice .spatial-drawer-actions {
+  flex-direction: column;
+}
+
+.auth-drawer-choice .spatial-drawer-actions .spatial-drawer-btn {
+  width: 100%;
+}
+
+.auth-drawer-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  flex-shrink: 0;
+}
+
+.auth-drawer-header--back-only {
+  justify-content: flex-start;
+  margin-bottom: var(--space-2);
+}
+
+.auth-drawer-form-title {
+  margin: 0 0 var(--space-2);
+  padding: 0;
+}
+
+.auth-drawer-back {
+  padding: var(--space-2) var(--space-3);
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  color: var(--foreground-muted);
+  background: var(--background-muted);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+}
+
+.auth-drawer-back:hover {
+  color: var(--foreground-default);
+  background: var(--background-default);
+  border-color: var(--border-default);
+}
+
+.auth-drawer-close {
+  flex-shrink: 0;
+  padding: var(--space-2) var(--space-3);
+  font-size: var(--font-size-xl);
+  line-height: 1;
+  background: none;
+  border: none;
+  color: var(--foreground-muted);
+  cursor: pointer;
+}
+
+.auth-drawer-close:hover {
+  color: var(--foreground-default);
+}
+
+.auth-drawer-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  flex: 1 1 0;
+  min-height: 0;
+}
+
+.auth-drawer-label {
+  display: block;
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  color: var(--foreground-default);
+}
+
+.spatial-drawer-input {
+  width: 100%;
+  padding: var(--space-2) var(--space-3);
+  font-size: var(--font-size-base);
+  font-family: inherit;
+  line-height: 1.5;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-default);
+  background: var(--background-default);
+  color: var(--foreground-default);
+  box-sizing: border-box;
+}
+
+.spatial-drawer-input:focus {
+  outline: 2px solid var(--accent-default);
+  outline-offset: 2px;
+}
+
+.auth-drawer-error {
+  font-size: var(--font-size-sm);
+  color: var(--danger-default);
+}
+
+.auth-drawer-password-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.auth-drawer-input-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.auth-drawer-password-input {
+  padding-right: 2.75rem;
+}
+
+.auth-drawer-password-toggle {
+  position: absolute;
+  right: var(--space-2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-1);
+  background: none;
+  border: none;
+  color: var(--foreground-muted);
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+}
+
+.auth-drawer-password-toggle:hover {
+  color: var(--foreground-default);
+}
+
+.auth-drawer-password-icon {
+  display: block;
+}
+
+.auth-drawer-password-hint {
+  margin: 0;
+  font-size: 0.8125rem;
+  color: var(--foreground-muted);
+  line-height: 1.4;
+}
+
 /* Undo bar (only visible after delete) */
 .spatial-undo {
   position: fixed;
@@ -649,6 +959,7 @@ textarea.spatial-card-edit {
   align-items: center;
   gap: var(--space-2);
   padding: var(--space-3) var(--space-4);
+  padding-bottom: calc(var(--space-3) + 3px);
   background: var(--background-default);
   border: 1px solid var(--border-default);
   border-radius: var(--radius-xl);
@@ -656,10 +967,29 @@ textarea.spatial-card-edit {
   z-index: 50;
   font-size: var(--font-size-sm);
   color: var(--foreground-muted);
+  overflow: hidden;
 }
 
 .spatial-undo[hidden] {
   display: none !important;
+}
+
+/* Timer line – shrinks over 5s to show time remaining */
+.spatial-undo-timer {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--accent-default);
+  border-radius: 0 0 var(--radius-xl) var(--radius-xl);
+  transform-origin: left;
+  animation: spatial-undo-shrink 5s linear forwards;
+}
+
+@keyframes spatial-undo-shrink {
+  from { transform: scaleX(1); }
+  to { transform: scaleX(0); }
 }
 
 .spatial-undo-msg {
@@ -669,16 +999,26 @@ textarea.spatial-card-edit {
 
 .spatial-undo-btn {
   flex-shrink: 0;
-  padding: var(--space-2) var(--space-3);
-  font-size: 0.8125rem;
-  font-weight: 500;
-  border-radius: var(--radius-lg);
-  background: var(--accent-default);
-  color: white;
-  border: none;
-  cursor: pointer;
 }
 
-.spatial-undo-btn:hover {
-  background: var(--accent-emphasis);
+.spatial-undo-dismiss {
+  flex-shrink: 0;
+  width: 1.5rem;
+  height: 1.5rem;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--foreground-muted);
+  font-size: 1.25rem;
+  line-height: 1;
+  cursor: pointer;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.spatial-undo-dismiss:hover {
+  color: var(--foreground-default);
+  background: var(--background-muted);
 }

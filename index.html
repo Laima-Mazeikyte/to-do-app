@@ -21,7 +21,7 @@
                   type="text"
                   name="task"
                   autocomplete="off"
-                  placeholder="Add a task…"
+                  placeholder="Add a to-do…"
                 />
                 <button type="submit" id="spatial-todo-submit" class="spatial-btn-inline spatial-btn-inline--add" aria-label="Add task">
                   <span aria-hidden="true">+</span>
@@ -34,7 +34,7 @@
             <button type="button" class="spatial-filter-chip" data-filter="todo">To do</button>
             <button type="button" class="spatial-filter-chip" data-filter="done">Done</button>
           </div>
-          <button type="button" id="spatial-clear-done-btn" class="spatial-btn-clear-done spatial-btn--tertiary" aria-label="Delete all completed tasks" hidden>Clear done</button>
+          <button type="button" id="spatial-clear-done-btn" class="spatial-btn-clear-done spatial-btn--tertiary" aria-label="Clear all visible tasks" hidden>Clear all</button>
         </div>
         <div class="spatial-top-right">
           <label for="spatial-search-input" class="sr-only">Search tasks</label>
@@ -51,8 +51,42 @@
               <span aria-hidden="true">⋮</span>
             </button>
             <div id="spatial-more-menu" class="spatial-more-menu" role="menu" hidden>
-              <button type="button" class="spatial-more-item" role="menuitem" data-action="copy">Copy todos</button>
-              <button type="button" class="spatial-more-item" role="menuitem" data-action="paste">Paste to-dos</button>
+              <button type="button" class="spatial-more-item spatial-more-item--with-icon" role="menuitem" data-action="paste">
+                <span class="spatial-more-item-icon" aria-hidden="true">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/></svg>
+                </span>
+                <span class="spatial-more-item-text" data-copy="morePaste">Paste to-dos</span>
+              </button>
+              <button type="button" class="spatial-more-item spatial-more-item--with-icon" role="menuitem" data-action="copy">
+                <span class="spatial-more-item-icon" aria-hidden="true">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                </span>
+                <span class="spatial-more-item-text" data-copy="moreCopy">Copy to-dos</span>
+              </button>
+              <div class="spatial-more-divider" role="separator"></div>
+              <div class="spatial-more-label" role="presentation" data-copy="moreBackground">Background color</div>
+              <div class="spatial-more-colors" role="group" aria-label="Background color">
+                <button type="button" class="spatial-more-color" data-color="default" aria-label="Default background" title="Default"></button>
+                <button type="button" class="spatial-more-color" data-color="warm" aria-label="Warm cream background" title="Warm"></button>
+                <button type="button" class="spatial-more-color" data-color="cool" aria-label="Cool blue background" title="Cool"></button>
+                <button type="button" class="spatial-more-color" data-color="mint" aria-label="Mint green background" title="Mint"></button>
+                <button type="button" class="spatial-more-color" data-color="lavender" aria-label="Lavender background" title="Lavender"></button>
+                <button type="button" class="spatial-more-color" data-color="rose" aria-label="Rose background" title="Rose"></button>
+                <button type="button" class="spatial-more-color" data-color="coral" aria-label="Coral background" title="Coral"></button>
+                <button type="button" class="spatial-more-color" data-color="sky" aria-label="Sky blue background" title="Sky"></button>
+                <button type="button" class="spatial-more-color" data-color="sage" aria-label="Sage green background" title="Sage"></button>
+                <button type="button" class="spatial-more-color" data-color="sand" aria-label="Sand background" title="Sand"></button>
+                <button type="button" class="spatial-more-color" data-color="slate" aria-label="Slate background" title="Slate"></button>
+              </div>
+              <div id="spatial-more-auth" class="spatial-more-auth" hidden>
+                <div class="spatial-more-divider" role="separator"></div>
+                <button type="button" id="spatial-more-auth-btn" class="spatial-more-item spatial-more-item--with-icon" role="menuitem" data-action="signin" aria-label="Sign in or create account">
+                  <span class="spatial-more-item-icon" aria-hidden="true">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+                  </span>
+                  <span class="spatial-more-item-text">Sign in</span>
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -66,26 +100,37 @@
       <div id="spatial-auth-footer" class="spatial-auth-footer">
         <div id="auth-header" class="spatial-auth-header" aria-label="Account"></div>
       </div>
+      <div id="spatial-auth-drawer-backdrop" class="spatial-drawer-backdrop" aria-hidden="true" hidden></div>
+      <aside id="spatial-auth-drawer" class="spatial-drawer" role="dialog" aria-modal="true" aria-labelledby="spatial-auth-drawer-title" hidden>
+        <div id="spatial-auth-drawer-content"></div>
+      </aside>
       <div id="spatial-paste-drawer-backdrop" class="spatial-drawer-backdrop" aria-hidden="true" hidden></div>
       <aside id="spatial-paste-drawer" class="spatial-drawer" role="dialog" aria-modal="true" aria-labelledby="spatial-paste-drawer-title" hidden>
-        <h2 id="spatial-paste-drawer-title" class="spatial-drawer-title">Paste todos</h2>
-        <p class="spatial-drawer-hint">Paste your list here… One line per task. Bullets, numbers, and [ ] are stripped. Long lines become long cards (truncated in view).</p>
+        <h2 id="spatial-paste-drawer-title" class="spatial-drawer-title">Add from a list</h2>
+        <p class="spatial-drawer-hint">Paste your list from Notes, Notion, or anywhere else. Each line becomes a to-do.</p>
         <textarea
           id="spatial-paste-drawer-textarea"
           class="spatial-drawer-textarea"
           placeholder="Paste your list here…"
-          aria-label="Pasted list (one line per task)"
-          rows="12"
-       ></textarea>
-        <div id="spatial-paste-drawer-empty" class="spatial-drawer-empty" role="alert" hidden>No tasks to add.</div>
+          aria-label="Paste your list (one line per to-do)"
+        ></textarea>
+        <div id="spatial-paste-drawer-empty" class="spatial-drawer-empty" role="alert" hidden>Nothing to add—paste your list first.</div>
         <div class="spatial-drawer-actions">
-          <button type="button" id="spatial-paste-drawer-create" class="spatial-drawer-btn spatial-drawer-btn--primary">Create cards</button>
+          <button type="button" id="spatial-paste-drawer-create" class="spatial-drawer-btn spatial-drawer-btn--primary">Add to-dos</button>
           <button type="button" id="spatial-paste-drawer-cancel" class="spatial-drawer-btn spatial-drawer-btn--secondary">Cancel</button>
         </div>
       </aside>
+      <div id="spatial-copy-toast" class="spatial-copy-toast" role="status" aria-live="polite" hidden>
+        <span class="spatial-copy-toast-icon" aria-hidden="true">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+        </span>
+        <span id="spatial-copy-toast-text" class="spatial-copy-toast-text">Copied successfully</span>
+      </div>
       <div id="spatial-undo-bar" class="spatial-undo" role="status" aria-live="polite" hidden>
+        <div id="spatial-undo-timer" class="spatial-undo-timer" role="presentation" aria-hidden="true"></div>
         <span id="spatial-undo-msg" class="spatial-undo-msg"></span>
-        <button type="button" id="spatial-undo-btn" class="spatial-undo-btn" aria-label="Undo delete">Undo</button>
+        <button type="button" id="spatial-undo-btn" class="spatial-undo-btn spatial-btn--tertiary" aria-label="Undo delete">Undo</button>
+        <button type="button" id="spatial-undo-dismiss" class="spatial-undo-dismiss" aria-label="Dismiss and finalize">×</button>
       </div>
     </div>
     <script type="module" src="/src/spatial-main.js"></script>
