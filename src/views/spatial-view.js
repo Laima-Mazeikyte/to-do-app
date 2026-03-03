@@ -513,7 +513,10 @@ export function initSpatialView(supabase, options = {}) {
     }
   }
 
+  let syncFrameCount = 0
   function syncBodyToDom() {
+    const rect = getStageRect()
+    if (rect.width < 10 || rect.height < 10) return
     for (const [, { body, element }] of cardMap) {
       clampBodyToStage(body)
       element.style.left = body.position.x + 'px'
@@ -524,6 +527,27 @@ export function initSpatialView(supabase, options = {}) {
         element.style.zIndex = String(Math.round(body.position.y))
       }
     }
+    // #region agent log
+    syncFrameCount++
+    if (cardMap.size > 0 && syncFrameCount % 120 === 1) {
+      const rect = getStageRect()
+      const [, entry] = [...cardMap.entries()][0]
+      if (entry) {
+        const elRect = entry.element.getBoundingClientRect()
+        const expectedCenterX = rect.left + entry.body.position.x
+        const expectedCenterY = rect.top + entry.body.position.y
+        const actualCenterX = elRect.left + elRect.width / 2
+        const actualCenterY = elRect.top + elRect.height / 2
+        const dx = Math.abs(actualCenterX - expectedCenterX)
+        const dy = Math.abs(actualCenterY - expectedCenterY)
+        if (dx > 5 || dy > 5) {
+          const payload = { sessionId: '41cc86', location: 'spatial-view.js:syncBodyToDom', message: 'Body/DOM mismatch', data: { expectedCenterX, expectedCenterY, actualCenterX, actualCenterY, dx, dy, bodyPos: entry.body.position, stageRect: { left: rect.left, top: rect.top } }, timestamp: Date.now(), hypothesisId: 'C' }
+          fetch('http://127.0.0.1:7308/ingest/c142f65c-2a15-4e36-a402-a64aa2d8e75a', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Debug-Session-Id': '41cc86' }, body: JSON.stringify(payload) }).catch(() => {})
+          console.warn('[debug] Body/DOM mismatch', payload)
+        }
+      }
+    }
+    // #endregion
   }
 
   /** Sync the physics pile to the current filter: remove filtered-out cards, add filtered-in cards. */
@@ -553,8 +577,28 @@ export function initSpatialView(supabase, options = {}) {
     updateFilterHint()
   }
 
-  function runLoop() {
-    Engine.update(engine)
+  /** Max delta (ms) to prevent physics overshoot when tab was hidden and rAF throttled. Matter.js recommends ≤16.667ms. */
+  const MAX_DELTA_MS = 1000 / 60
+  let lastUpdateTime = 0
+
+  function runLoop(now) {
+    if (document.visibilityState === 'hidden') {
+      animationId = requestAnimationFrame(runLoop)
+      return
+    }
+    const t = typeof now === 'number' ? now : performance.now()
+    const rawDelta = lastUpdateTime ? t - lastUpdateTime : 0
+    const delta = lastUpdateTime ? Math.min(rawDelta, MAX_DELTA_MS) : MAX_DELTA_MS
+    // #region agent log
+    if (rawDelta > 80) {
+      const rect = getStageRect()
+      const footerTopY = getFooterTopY()
+      const samplePos = cardMap.size ? [...cardMap.entries()].slice(0,2).map(([,e])=>({x:e.body.position.x,y:e.body.position.y})) : []
+      fetch('http://127.0.0.1:7308/ingest/c142f65c-2a15-4e36-a402-a64aa2d8e75a',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'41cc86'},body:JSON.stringify({sessionId:'41cc86',location:'spatial-view.js:runLoop',message:'Large delta',data:{rawDelta,clampedDelta:delta,visible:document.visibilityState,cardCount:cardMap.size,stageH:rect.height,footerTopY,samplePos},timestamp:Date.now(),hypothesisId:'A'})}).catch(()=>{});
+    }
+    // #endregion
+    lastUpdateTime = t
+    Engine.update(engine, delta)
     syncBodyToDom()
     animationId = requestAnimationFrame(runLoop)
   }
@@ -900,14 +944,17 @@ export function initSpatialView(supabase, options = {}) {
       refreshMoreMenuAuth()
     }
 
-    // Restore background preference
+    // Restore background preference (migrate old values to warm)
+    const VALID_THEMES = ['warm', 'sand', 'lavender', 'sage']
     const savedBg = localStorage.getItem('spatial-bg')
-    if (savedBg && appEl) {
-      if (savedBg !== 'default') appEl.dataset.bg = savedBg
+    const bg = savedBg && VALID_THEMES.includes(savedBg) ? savedBg : 'warm'
+    if (appEl) {
+      appEl.dataset.bg = bg
       moreMenu.querySelectorAll('.spatial-more-color').forEach((btn) => {
-        btn.classList.toggle('spatial-more-color--active', btn.dataset.color === savedBg)
+        btn.classList.toggle('spatial-more-color--active', btn.dataset.color === bg)
       })
     }
+    if (bg !== savedBg) localStorage.setItem('spatial-bg', bg)
 
     moreBtn.addEventListener('click', async (e) => {
       e.preventDefault()
@@ -937,11 +984,7 @@ export function initSpatialView(supabase, options = {}) {
       btn.addEventListener('click', () => {
         const color = btn.dataset.color
         if (!color || !appEl) return
-        if (color === 'default') {
-          delete appEl.dataset.bg
-        } else {
-          appEl.dataset.bg = color
-        }
+        appEl.dataset.bg = color
         localStorage.setItem('spatial-bg', color)
         moreMenu.querySelectorAll('.spatial-more-color').forEach((b) => {
           b.classList.toggle('spatial-more-color--active', b.dataset.color === color)
@@ -982,6 +1025,13 @@ export function initSpatialView(supabase, options = {}) {
   function handleResize() {
     const rect = getStageRect()
     const footerTopY = getFooterTopY()
+    // #region agent log
+    if (cardMap.size > 0 && (rect.width < 10 || rect.height < 10)) {
+      const payload = { sessionId: '41cc86', location: 'spatial-view.js:handleResize', message: 'Suspicious stage rect', data: { stageW: rect.width, stageH: rect.height, footerTopY, cardCount: cardMap.size }, timestamp: Date.now(), hypothesisId: 'D' }
+      fetch('http://127.0.0.1:7308/ingest/c142f65c-2a15-4e36-a402-a64aa2d8e75a', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Debug-Session-Id': '41cc86' }, body: JSON.stringify(payload) }).catch(() => {})
+      console.warn('[debug] Suspicious stage rect on resize', payload)
+    }
+    // #endregion
     const wallHeight = Math.max(rect.height, footerTopY) + FLOOR_HEIGHT + 100
     const wallCenterY = wallHeight / 2
     if (floor) {
@@ -991,6 +1041,9 @@ export function initSpatialView(supabase, options = {}) {
     if (rightWall) Body.setPosition(rightWall, { x: rect.width + 10, y: wallCenterY })
     if (topWall) Body.setPosition(topWall, { x: rect.width / 2, y: -10 })
     engine.world.bounds = { min: { x: 0, y: 0 }, max: { x: rect.width, y: rect.height } }
+    if (rect.width >= 10 && rect.height >= 10 && cardMap.size > 0) {
+      syncBodyToDom()
+    }
   }
 
   form.addEventListener('submit', (e) => {
@@ -1036,6 +1089,22 @@ export function initSpatialView(supabase, options = {}) {
   }
 
   window.addEventListener('resize', handleResize)
+
+  function onReturnToView() {
+    lastUpdateTime = 0
+    if (!engine) return
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        handleResize()
+        for (const [, { body }] of cardMap) clampBodyToStage(body)
+        syncBodyToDom()
+      })
+    })
+  }
+
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') onReturnToView()
+  })
 
   // Update physics bounds when stage resizes (e.g. auth footer content changes on login/logout)
   const resizeObserver = new ResizeObserver(() => {

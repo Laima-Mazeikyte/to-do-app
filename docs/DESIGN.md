@@ -19,9 +19,10 @@ For the full list of tokens and which CSS class belongs to which component, see 
 
 ## Changing the theme
 
-1. **Colors:** Edit `src/tokens.css`. The top section under `:root` is the light theme (semantic tokens). To change the palette, edit the primitive `--color-*` values, then the semantic ones that reference them.
+1. **Colors:** Edit `src/tokens.css`. The top section under `:root` is the light theme (semantic tokens). The palette uses warm grays and a default terracotta accent. Edit primitive `--color-*` values, then the semantic ones that reference them.
 2. **Dark theme:** Edit the `.dark` block in `src/tokens.css`. Same semantic names, different values. Add the class to a root element (e.g. `<html class="dark">`) to switch.
-3. **New theme (e.g. "high contrast"):** Add a new class (e.g. `.theme-high-contrast`) in `tokens.css` and override the same semantic variables. No need to change component CSS.
+3. **Background colorways:** The app has 4 background themes (Warm, Sand, Lavender, Sage) in the More menu. Each sets `data-bg` on `#app` and overrides `--background-subtle` and `--accent-default` / `--accent-emphasis` in `src/spatial.css`. The CTA color adapts to the chosen background.
+4. **New theme (e.g. "high contrast"):** Add a new class (e.g. `.theme-high-contrast`) in `tokens.css` and override the same semantic variables. No need to change component CSS.
 
 ## Typography and spacing
 

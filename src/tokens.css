@@ -3,24 +3,71 @@
    ============================================ */
 
 :root {
-  /* ----- Primitives: colors ----- */
+  /* ----- Primitives: colors (warm grays) ----- */
   --color-white: #ffffff;
-  --color-gray-50: #fafafa;
-  --color-gray-100: #f5f5f5;
-  --color-gray-200: #e5e5e5;
-  --color-gray-300: #d4d4d4;
-  --color-gray-400: #a3a3a3;
-  --color-gray-500: #737373;
-  --color-gray-600: #525252;
-  --color-gray-700: #404040;
-  --color-gray-800: #262626;
-  --color-gray-900: #171717;
-  --color-gray-950: #0a0a0a;
+  --color-gray-50: #fafaf9;
+  --color-gray-100: #f5f5f4;
+  --color-gray-200: #e7e5e4;
+  --color-gray-300: #d6d3d1;
+  --color-gray-400: #a8a29e;
+  --color-gray-500: #78716c;
+  --color-gray-600: #57534e;
+  --color-gray-700: #44403c;
+  --color-gray-800: #292524;
+  --color-gray-900: #1c1917;
+  --color-gray-950: #0c0a09;
 
-  --color-blue-300: #93c5fd;
-  --color-blue-400: #60a5fa;
-  --color-blue-500: #3b82f6;
-  --color-blue-600: #2563eb;
+  /* Accent primitives (terracotta – default when no theme selected) */
+  --color-accent-light: #c2410c;
+  --color-accent-light-hover: #9a3412;
+  --color-accent-dark: #ea580c;
+  --color-accent-dark-hover: #c2410c;
+
+  /* ----- Colorway primitives (Warm, Sand, Lavender, Sage) – unified warm set ----- */
+  /* Warm (warm blue) */
+  --colorway-warm-bg-light: #e8ecf4;
+  --colorway-warm-bg-dark: #2d3240;
+  --colorway-warm-done-bg-light: #e0e6f0;
+  --colorway-warm-done-bg-dark: #252a35;
+  --colorway-warm-card-border-light: #a8b8c8;
+  --colorway-warm-card-border-dark: #3d4a5a;
+  --colorway-warm-accent-light: #4a6b8a;
+  --colorway-warm-accent-light-hover: #3d5a75;
+  --colorway-warm-accent-dark: #5c7a9e;
+  --colorway-warm-accent-dark-hover: #4a6b8a;
+  /* Sand */
+  --colorway-sand-bg-light: #fde6d0;
+  --colorway-sand-bg-dark: #42392f;
+  --colorway-sand-done-bg-light: #fdf0e4;
+  --colorway-sand-done-bg-dark: #3a3228;
+  --colorway-sand-card-border-light: #d4b898;
+  --colorway-sand-card-border-dark: #5a4a3d;
+  --colorway-sand-accent-light: #b45309;
+  --colorway-sand-accent-light-hover: #92400e;
+  --colorway-sand-accent-dark: #d97706;
+  --colorway-sand-accent-dark-hover: #b45309;
+  /* Lavender (warm mauve) */
+  --colorway-lavender-bg-light: #f6e9f4;
+  --colorway-lavender-bg-dark: #38283d;
+  --colorway-lavender-done-bg-light: #f4eaf2;
+  --colorway-lavender-done-bg-dark: #32283a;
+  --colorway-lavender-card-border-light: #c8a8c8;
+  --colorway-lavender-card-border-dark: #4a3d5a;
+  --colorway-lavender-accent-light: #8b5a9e;
+  --colorway-lavender-accent-light-hover: #7a4a8a;
+  --colorway-lavender-accent-dark: #a06bb5;
+  --colorway-lavender-accent-dark-hover: #8b5a9e;
+  /* Sage (warm moss) */
+  --colorway-sage-bg-light: #eaf0e6;
+  --colorway-sage-bg-dark: #252d24;
+  --colorway-sage-done-bg-light: #e6f0e8;
+  --colorway-sage-done-bg-dark: #1a2520;
+  --colorway-sage-card-border-light: #a8c0a8;
+  --colorway-sage-card-border-dark: #3d4a3d;
+  --colorway-sage-accent-light: #3d6b4a;
+  --colorway-sage-accent-light-hover: #2d5a3a;
+  --colorway-sage-accent-dark: #4a7c5a;
+  --colorway-sage-accent-dark-hover: #3d6b4a;
 
   --color-green-400: #4ade80;
   --color-green-500: #22c55e;
@@ -77,8 +124,11 @@
   --border-default: var(--color-gray-200);
   --border-muted: var(--color-gray-100);
 
-  --accent-default: var(--color-blue-500);
-  --accent-emphasis: var(--color-blue-600);
+  --accent-default: var(--color-accent-light);
+  --accent-emphasis: var(--color-accent-light-hover);
+
+  --done-card-bg: var(--colorway-warm-done-bg-light);
+  --card-border: var(--colorway-warm-card-border-light);
 
   --success-default: var(--color-green-500);
   --success-emphasis: var(--color-green-600);
@@ -100,8 +150,11 @@
   --border-default: var(--color-gray-800);
   --border-muted: var(--color-gray-900);
 
-  --accent-default: var(--color-blue-400);
-  --accent-emphasis: var(--color-blue-500);
+  --accent-default: var(--color-accent-dark);
+  --accent-emphasis: var(--color-accent-dark-hover);
+
+  --done-card-bg: var(--colorway-warm-done-bg-dark);
+  --card-border: var(--colorway-warm-card-border-dark);
 
   --success-default: var(--color-green-500);
   --success-emphasis: var(--color-green-400);

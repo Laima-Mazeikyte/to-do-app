@@ -255,63 +255,85 @@
   transform: scale(1.1);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
-.spatial-more-color[data-color="default"] { background: var(--color-gray-50); }
-.spatial-app.dark .spatial-more-color[data-color="default"] { background: var(--color-gray-900); }
-.spatial-more-color[data-color="warm"] { background: #fef3e2; }
-.spatial-app.dark .spatial-more-color[data-color="warm"] { background: #3d3528; }
-.spatial-more-color[data-color="cool"] { background: #e8f4fc; }
-.spatial-app.dark .spatial-more-color[data-color="cool"] { background: #1a2d3d; }
-.spatial-more-color[data-color="mint"] { background: #e8f8f0; }
-.spatial-app.dark .spatial-more-color[data-color="mint"] { background: #1a2d26; }
-.spatial-more-color[data-color="lavender"] { background: #f0e8f8; }
-.spatial-app.dark .spatial-more-color[data-color="lavender"] { background: #2d1a3d; }
-.spatial-more-color[data-color="rose"] { background: #fce7f3; }
-.spatial-app.dark .spatial-more-color[data-color="rose"] { background: #3d1a2d; }
-.spatial-more-color[data-color="coral"] { background: #ffe4e1; }
-.spatial-app.dark .spatial-more-color[data-color="coral"] { background: #3d2626; }
-.spatial-more-color[data-color="sky"] { background: #e0f2fe; }
-.spatial-app.dark .spatial-more-color[data-color="sky"] { background: #1a2d3d; }
-.spatial-more-color[data-color="sage"] { background: #ecfdf5; }
-.spatial-app.dark .spatial-more-color[data-color="sage"] { background: #1a2d26; }
-.spatial-more-color[data-color="sand"] { background: #fef7ed; }
-.spatial-app.dark .spatial-more-color[data-color="sand"] { background: #3d3528; }
-.spatial-more-color[data-color="slate"] { background: #f1f5f9; }
-.spatial-app.dark .spatial-more-color[data-color="slate"] { background: #1e293b; }
+.spatial-more-color[data-color="warm"] { background: var(--colorway-warm-bg-light); }
+.spatial-app.dark .spatial-more-color[data-color="warm"] { background: var(--colorway-warm-bg-dark); }
+.spatial-more-color[data-color="sand"] { background: var(--colorway-sand-bg-light); }
+.spatial-app.dark .spatial-more-color[data-color="sand"] { background: var(--colorway-sand-bg-dark); }
+.spatial-more-color[data-color="lavender"] { background: var(--colorway-lavender-bg-light); }
+.spatial-app.dark .spatial-more-color[data-color="lavender"] { background: var(--colorway-lavender-bg-dark); }
+.spatial-more-color[data-color="sage"] { background: var(--colorway-sage-bg-light); }
+.spatial-app.dark .spatial-more-color[data-color="sage"] { background: var(--colorway-sage-bg-dark); }
 
-.spatial-app[data-bg="warm"] { --background-subtle: #fef3e2; }
-.spatial-app.dark[data-bg="warm"] { --background-subtle: #3d3528; }
-.spatial-app[data-bg="cool"] { --background-subtle: #e8f4fc; }
-.spatial-app.dark[data-bg="cool"] { --background-subtle: #1a2d3d; }
-.spatial-app[data-bg="mint"] { --background-subtle: #e8f8f0; }
-.spatial-app.dark[data-bg="mint"] { --background-subtle: #1a2d26; }
-.spatial-app[data-bg="lavender"] { --background-subtle: #f0e8f8; }
-.spatial-app.dark[data-bg="lavender"] { --background-subtle: #2d1a3d; }
-.spatial-app[data-bg="rose"] { --background-subtle: #fce7f3; }
-.spatial-app.dark[data-bg="rose"] { --background-subtle: #3d1a2d; }
-.spatial-app[data-bg="coral"] { --background-subtle: #ffe4e1; }
-.spatial-app.dark[data-bg="coral"] { --background-subtle: #3d2626; }
-.spatial-app[data-bg="sky"] { --background-subtle: #e0f2fe; }
-.spatial-app.dark[data-bg="sky"] { --background-subtle: #1a2d3d; }
-.spatial-app[data-bg="sage"] { --background-subtle: #ecfdf5; }
-.spatial-app.dark[data-bg="sage"] { --background-subtle: #1a2d26; }
-.spatial-app[data-bg="sand"] { --background-subtle: #fef7ed; }
-.spatial-app.dark[data-bg="sand"] { --background-subtle: #3d3528; }
-.spatial-app[data-bg="slate"] { --background-subtle: #f1f5f9; }
-.spatial-app.dark[data-bg="slate"] { --background-subtle: #1e293b; }
+.spatial-app[data-bg="warm"] {
+  --background-subtle: var(--colorway-warm-bg-light);
+  --done-card-bg: var(--colorway-warm-done-bg-light);
+  --card-border: var(--colorway-warm-card-border-light);
+  --accent-default: var(--colorway-warm-accent-light);
+  --accent-emphasis: var(--colorway-warm-accent-light-hover);
+}
+.spatial-app.dark[data-bg="warm"] {
+  --background-subtle: var(--colorway-warm-bg-dark);
+  --done-card-bg: var(--colorway-warm-done-bg-dark);
+  --card-border: var(--colorway-warm-card-border-dark);
+  --accent-default: var(--colorway-warm-accent-dark);
+  --accent-emphasis: var(--colorway-warm-accent-dark-hover);
+}
+.spatial-app[data-bg="sand"] {
+  --background-subtle: var(--colorway-sand-bg-light);
+  --done-card-bg: var(--colorway-sand-done-bg-light);
+  --card-border: var(--colorway-sand-card-border-light);
+  --accent-default: var(--colorway-sand-accent-light);
+  --accent-emphasis: var(--colorway-sand-accent-light-hover);
+}
+.spatial-app.dark[data-bg="sand"] {
+  --background-subtle: var(--colorway-sand-bg-dark);
+  --done-card-bg: var(--colorway-sand-done-bg-dark);
+  --card-border: var(--colorway-sand-card-border-dark);
+  --accent-default: var(--colorway-sand-accent-dark);
+  --accent-emphasis: var(--colorway-sand-accent-dark-hover);
+}
+.spatial-app[data-bg="lavender"] {
+  --background-subtle: var(--colorway-lavender-bg-light);
+  --done-card-bg: var(--colorway-lavender-done-bg-light);
+  --card-border: var(--colorway-lavender-card-border-light);
+  --accent-default: var(--colorway-lavender-accent-light);
+  --accent-emphasis: var(--colorway-lavender-accent-light-hover);
+}
+.spatial-app.dark[data-bg="lavender"] {
+  --background-subtle: var(--colorway-lavender-bg-dark);
+  --done-card-bg: var(--colorway-lavender-done-bg-dark);
+  --card-border: var(--colorway-lavender-card-border-dark);
+  --accent-default: var(--colorway-lavender-accent-dark);
+  --accent-emphasis: var(--colorway-lavender-accent-dark-hover);
+}
+.spatial-app[data-bg="sage"] {
+  --background-subtle: var(--colorway-sage-bg-light);
+  --done-card-bg: var(--colorway-sage-done-bg-light);
+  --card-border: var(--colorway-sage-card-border-light);
+  --accent-default: var(--colorway-sage-accent-light);
+  --accent-emphasis: var(--colorway-sage-accent-light-hover);
+}
+.spatial-app.dark[data-bg="sage"] {
+  --background-subtle: var(--colorway-sage-bg-dark);
+  --done-card-bg: var(--colorway-sage-done-bg-dark);
+  --card-border: var(--colorway-sage-card-border-dark);
+  --accent-default: var(--colorway-sage-accent-dark);
+  --accent-emphasis: var(--colorway-sage-accent-dark-hover);
+}
 
 .spatial-more-color--active {
   box-shadow: 0 0 0 2px var(--accent-default);
 }
 
-/* Copy success toast */
+/* Copy success toast – below more menu, right-aligned */
 .spatial-copy-toast {
-  position: fixed;
-  bottom: calc(var(--space-4) + 4rem);
-  left: 50%;
-  transform: translateX(-50%);
+  position: absolute;
+  top: calc(100% + var(--space-1));
+  right: 0;
   display: flex;
   align-items: center;
   gap: var(--space-2);
+  white-space: nowrap;
   padding: var(--space-2) var(--space-4);
   font-size: var(--font-size-sm);
   color: var(--foreground-default);
@@ -319,7 +341,7 @@
   border: 1px solid var(--border-default);
   border-radius: var(--radius-lg);
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
-  z-index: 100;
+  z-index: 21;
   animation: spatial-toast-in 0.2s ease;
 }
 .spatial-copy-toast[hidden] {
@@ -334,8 +356,8 @@
   display: block;
 }
 @keyframes spatial-toast-in {
-  from { opacity: 0; transform: translateX(-50%) translateY(8px); }
-  to { opacity: 1; transform: translateX(-50%) translateY(0); }
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 /* Filter chips - larger padding */
@@ -497,10 +519,10 @@
   box-sizing: border-box;
   padding: 0;
   border-radius: var(--radius-lg);
-  border: 1px solid var(--border-default);
+  border: 1px solid var(--card-border);
   background: var(--background-default);
   color: var(--foreground-default);
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04), 0 12px 32px rgba(0, 0, 0, 0.05);
   pointer-events: auto;
   transition: box-shadow 0.15s ease, background-color 0.15s ease;
   min-width: 90px;
@@ -605,7 +627,7 @@
 }
 
 .spatial-card--done {
-  background-color: var(--background-muted);
+  background-color: var(--done-card-bg);
 }
 .spatial-card--done .spatial-card-text {
   color: var(--foreground-muted);
