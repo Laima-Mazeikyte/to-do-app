@@ -2,12 +2,12 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link href="data:image/x-icon;base64,AAABAAEAEBAAAAAAAABoBQAAFgAAACgAAAAQAAAAIAAAAAEACAAAAAAAAAEAAAAAAAAAAAAAAAEAAAAAAADm5uYAAAAAAFxcXAD///8A3s/8ACsrKwClefwAv57/AEpKSgDt7e0AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQEFAQEBAQEBAQEBAQEFAQMDAwMDAwMDAwMBAQEFAQAGBwMDAwMDAwYHAwEBBQEJCQEBAwYGAwEBAwMBAQUBCQkBAQMDAwMBAQMDAQEFAQkJAwMDAwMDAwMDAwEBBQEACQMDAwMDAwMDAwMBAQUBAAkDAwMDAwMDAwMDAQEBBQEJAwMDAwMDAwMDAQEBAQEFAQMBAQEBAQEDAQEBAQEFAQMEAQEBAQEBBAMBAQEFAQMGAwEBAQEBAQMGAwEBBQEDBwMBAQEBAQEDBwMBAQUBAwcDAQEBAQEBAwcDAQEBCAEDAwEBAQEBAQMDAQEBAQECAQEBAQEBAQEBAQEBAcAHAACAAwAAAAEAAAABAAAAAQAAAAEAAAABAAAAAQAAgAMAAMAHAACDwwAAA8EAAAPBAAADwQAAg8MAAMfnAAA=" rel="icon" type="image/x-icon" />
+    <link rel="icon" href="/assets/favicon(2).ico" type="image/x-icon" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Seaweed+Script&display=swap" rel="stylesheet" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>The To-do Pile</title>
+    <title>A Heap Of To-Dos</title>
     <script>
       (function () {
         var s = typeof localStorage !== 'undefined' && localStorage.getItem('spatial-theme');
@@ -19,7 +19,7 @@
     </script>
   </head>
   <body>
-    <div id="app" class="spatial-app">
+    <div id="app" class="spatial-app" data-bg="pink">
       <div class="spatial-floating-top">
         <button type="button" id="spatial-cleanup-toggle" class="spatial-gravity-toggle" aria-label="Toggle gravity mode" aria-pressed="false">
           <span id="spatial-gravity-label" class="spatial-gravity-label">Gravity mode: On</span>
@@ -87,6 +87,7 @@
               <div class="spatial-more-divider" role="separator"></div>
               <div class="spatial-more-label" role="presentation" data-copy="moreBackground">Background color</div>
               <div class="spatial-more-colors" role="group" aria-label="Background color">
+                <button type="button" class="spatial-more-color" data-color="pink" aria-label="Pink background" title="Pink"></button>
                 <button type="button" class="spatial-more-color" data-color="warm" aria-label="Warm cream background" title="Warm"></button>
                 <button type="button" class="spatial-more-color" data-color="sand" aria-label="Sand background" title="Sand"></button>
                 <button type="button" class="spatial-more-color" data-color="lavender" aria-label="Lavender background" title="Lavender"></button>

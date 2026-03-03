@@ -1203,10 +1203,10 @@ export function initSpatialView(supabase, options = {}) {
       btn.classList.toggle('spatial-more-theme--active', btn.dataset.theme === currentTheme)
     })
 
-    // Restore background preference (migrate old values to warm)
-    const VALID_THEMES = ['warm', 'sand', 'lavender', 'sage']
+    // Restore background preference (default: pink)
+    const VALID_THEMES = ['pink', 'warm', 'sand', 'lavender', 'sage']
     const savedBg = localStorage.getItem('spatial-bg')
-    const bg = savedBg && VALID_THEMES.includes(savedBg) ? savedBg : 'warm'
+    const bg = savedBg && VALID_THEMES.includes(savedBg) ? savedBg : 'pink'
     if (appEl) {
       appEl.dataset.bg = bg
       moreMenu.querySelectorAll('.spatial-more-color').forEach((btn) => {

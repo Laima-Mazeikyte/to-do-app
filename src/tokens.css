@@ -93,6 +93,23 @@
   --colorway-sage-accent-light-hover: #2d5a3a;
   --colorway-sage-accent-dark: #4a7c5a;
   --colorway-sage-accent-dark-hover: #3d6b4a;
+  /* Pink (favicon-inspired) */
+  --colorway-pink-bg-light: #fce8ec;
+  --colorway-pink-bg-dark: #3d282c;
+  --colorway-pink-surface-light: #fef5f7;
+  --colorway-pink-surface-dark: #4a3035;
+  --colorway-pink-surface-muted-light: #fdf0f2;
+  --colorway-pink-surface-muted-dark: #422a2e;
+  --colorway-pink-done-bg-light: #f9e0e6;
+  --colorway-pink-done-bg-dark: #362428;
+  --colorway-pink-done-text-light: #8b4a5a;
+  --colorway-pink-done-text-dark: #c89aa6;
+  --colorway-pink-card-border-light: #e8b8c4;
+  --colorway-pink-card-border-dark: #5a3d45;
+  --colorway-pink-accent-light: #c94f6e;
+  --colorway-pink-accent-light-hover: #a83d5a;
+  --colorway-pink-accent-dark: #e06b8a;
+  --colorway-pink-accent-dark-hover: #c94f6e;
 
   --color-green-400: #4ade80;
   --color-green-500: #22c55e;
@@ -140,22 +157,22 @@
   --radius-2xl: 1.25rem;
 
   /* ----- Semantic: light theme (default) ----- */
-  --background-default: var(--color-white);
-  --background-subtle: var(--color-gray-50);
-  --background-muted: var(--color-gray-100);
+  --background-default: var(--colorway-pink-surface-light);
+  --background-subtle: var(--colorway-pink-bg-light);
+  --background-muted: var(--colorway-pink-surface-muted-light);
 
   --foreground-default: var(--color-gray-900);
   --foreground-muted: var(--color-gray-600);
 
-  --border-default: var(--color-gray-200);
-  --border-muted: var(--color-gray-100);
+  --border-default: var(--colorway-pink-card-border-light);
+  --border-muted: var(--colorway-pink-surface-muted-light);
 
-  --accent-default: var(--color-accent-light);
-  --accent-emphasis: var(--color-accent-light-hover);
+  --accent-default: var(--colorway-pink-accent-light);
+  --accent-emphasis: var(--colorway-pink-accent-light-hover);
 
-  --done-card-bg: var(--colorway-warm-done-bg-light);
-  --done-card-text: var(--colorway-warm-done-text-light);
-  --card-border: var(--colorway-warm-card-border-light);
+  --done-card-bg: var(--colorway-pink-done-bg-light);
+  --done-card-text: var(--colorway-pink-done-text-light);
+  --card-border: var(--colorway-pink-card-border-light);
 
   --success-default: var(--color-green-500);
   --success-emphasis: var(--color-green-600);
@@ -168,22 +185,22 @@
 /* Dark theme: semantic overrides */
 .dark {
   color-scheme: dark;
-  --background-default: var(--color-gray-950);
-  --background-subtle: var(--color-gray-900);
-  --background-muted: var(--color-gray-800);
+  --background-default: var(--colorway-pink-surface-dark);
+  --background-subtle: var(--colorway-pink-bg-dark);
+  --background-muted: var(--colorway-pink-surface-muted-dark);
 
   --foreground-default: var(--color-gray-50);
   --foreground-muted: var(--color-gray-100);
 
-  --border-default: var(--color-gray-800);
-  --border-muted: var(--color-gray-900);
+  --border-default: var(--colorway-pink-card-border-dark);
+  --border-muted: var(--colorway-pink-surface-muted-dark);
 
-  --accent-default: var(--color-accent-dark);
-  --accent-emphasis: var(--color-accent-dark-hover);
+  --accent-default: var(--colorway-pink-accent-dark);
+  --accent-emphasis: var(--colorway-pink-accent-dark-hover);
 
-  --done-card-bg: var(--colorway-warm-done-bg-dark);
-  --done-card-text: var(--colorway-warm-done-text-dark);
-  --card-border: var(--colorway-warm-card-border-dark);
+  --done-card-bg: var(--colorway-pink-done-bg-dark);
+  --done-card-text: var(--colorway-pink-done-text-dark);
+  --card-border: var(--colorway-pink-card-border-dark);
 
   --success-default: var(--color-green-500);
   --success-emphasis: var(--color-green-400);

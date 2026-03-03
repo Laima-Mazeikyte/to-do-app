@@ -329,6 +329,8 @@
   transform: scale(1.1);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
+.spatial-more-color[data-color="pink"] { background: var(--colorway-pink-bg-light); }
+html.dark .spatial-more-color[data-color="pink"] { background: var(--colorway-pink-bg-dark); }
 .spatial-more-color[data-color="warm"] { background: var(--colorway-warm-bg-light); }
 html.dark .spatial-more-color[data-color="warm"] { background: var(--colorway-warm-bg-dark); }
 .spatial-more-color[data-color="sand"] { background: var(--colorway-sand-bg-light); }
@@ -338,6 +340,28 @@ html.dark .spatial-more-color[data-color="lavender"] { background: var(--colorwa
 .spatial-more-color[data-color="sage"] { background: var(--colorway-sage-bg-light); }
 html.dark .spatial-more-color[data-color="sage"] { background: var(--colorway-sage-bg-dark); }
 
+.spatial-app[data-bg="pink"] {
+  --background-subtle: var(--colorway-pink-bg-light);
+  --background-default: var(--colorway-pink-surface-light);
+  --background-muted: var(--colorway-pink-surface-muted-light);
+  --done-card-bg: var(--colorway-pink-done-bg-light);
+  --done-card-text: var(--colorway-pink-done-text-light);
+  --card-border: var(--colorway-pink-card-border-light);
+  --border-default: var(--colorway-pink-card-border-light);
+  --accent-default: var(--colorway-pink-accent-light);
+  --accent-emphasis: var(--colorway-pink-accent-light-hover);
+}
+html.dark .spatial-app[data-bg="pink"] {
+  --background-subtle: var(--colorway-pink-bg-dark);
+  --background-default: var(--colorway-pink-surface-dark);
+  --background-muted: var(--colorway-pink-surface-muted-dark);
+  --done-card-bg: var(--colorway-pink-done-bg-dark);
+  --done-card-text: var(--colorway-pink-done-text-dark);
+  --card-border: var(--colorway-pink-card-border-dark);
+  --border-default: var(--colorway-pink-card-border-dark);
+  --accent-default: var(--colorway-pink-accent-dark);
+  --accent-emphasis: var(--colorway-pink-accent-dark-hover);
+}
 .spatial-app[data-bg="warm"] {
   --background-subtle: var(--colorway-warm-bg-light);
   --background-default: var(--colorway-warm-surface-light);
