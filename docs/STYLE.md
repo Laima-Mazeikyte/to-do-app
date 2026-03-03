@@ -2,7 +2,7 @@
 
 Token reference and component → CSS class map. Use this when changing styles or adding new UI.
 
-**File locations:** Tokens and base styles in `src/tokens.css` and `src/base.css`. Spatial view styles in `src/spatial.css`.
+**File locations:** Tokens and base styles in `src/tokens.css` and `src/base.css`. Spatial view styles in `src/spatial.css`. UI copy (empty states, filter hints) in `src/copy.js`.
 
 ---
 
@@ -70,9 +70,9 @@ Light theme is the default (`:root` in `tokens.css`). Dark theme overrides seman
 | Component | Main class | Modifiers / children | Notes |
 |-----------|------------|----------------------|-------|
 | App shell | `.spatial-app` | — | Full width |
-| Header | `.spatial-header` | `.spatial-form`, `.spatial-input`, `.spatial-submit`, `.spatial-paste-todos-btn`, `.spatial-search-input` | |
+| Header | `.spatial-floating-top` | `.spatial-top-center`, `.spatial-top-right`, `.spatial-form`, `.spatial-input-wrap`, `.spatial-input--add`, `.spatial-btn-inline--add`, `.spatial-filters`, `.spatial-btn-clear-done`, `.spatial-btn--tertiary`, `.spatial-search-input` | Add task (input + button inside) + filters centered; search + more menu top-right |
 | Drop zones | `.spatial-drop-zone` | `.spatial-drop-zone--done`, `.spatial-drop-zone--delete`, `.spatial-drop-zone-count` | |
-| Stage | `.spatial-stage` | — | Physics canvas area |
+| Stage | `.spatial-stage` | `.spatial-empty-state`, `.spatial-empty-state-text` | Physics canvas area; empty state shown when no visible cards |
 | Card (physics) | `.spatial-card` | `.spatial-card--done`, `.spatial-card--editing`, `.spatial-card--over-done`, `.spatial-card--over-delete`, `.spatial-card--search-hidden` | |
 | Card internals | — | `.spatial-card-inner`, `.spatial-card-handle`, `.spatial-card-controls`, `.spatial-card-text`, edit/save classes | |
 | Undo bar | `.spatial-undo` | `.spatial-undo-msg`, `.spatial-undo-btn` | Shown after delete |

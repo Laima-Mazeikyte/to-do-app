@@ -9,58 +9,60 @@
   <body>
     <div id="app" class="spatial-app">
       <div class="spatial-floating-top">
+        <div class="spatial-top-spacer"></div>
         <div class="spatial-top-center">
           <div class="spatial-add-row">
             <form id="spatial-todo-form" class="spatial-form spatial-form--add" aria-label="Add new task">
               <label for="spatial-todo-input" class="sr-only">New task</label>
-              <input
-                id="spatial-todo-input"
-                class="spatial-input spatial-input--add"
-                type="text"
-                name="task"
-                autocomplete="off"
-                placeholder="Add a task…"
-              />
-            </form>
-            <div class="spatial-add-buttons">
-              <button type="submit" form="spatial-todo-form" id="spatial-todo-submit" class="spatial-btn-circle spatial-btn-circle--add" aria-label="Add task">
-                <span aria-hidden="true">+</span>
-              </button>
-              <div class="spatial-more-wrap">
-                <button type="button" id="spatial-more-btn" class="spatial-btn-circle spatial-btn-circle--more" aria-label="More options" aria-haspopup="menu" aria-expanded="false">
-                  <span aria-hidden="true">⋮</span>
+              <div class="spatial-input-wrap">
+                <input
+                  id="spatial-todo-input"
+                  class="spatial-input spatial-input--add"
+                  type="text"
+                  name="task"
+                  autocomplete="off"
+                  placeholder="Add a task…"
+                />
+                <button type="submit" id="spatial-todo-submit" class="spatial-btn-inline spatial-btn-inline--add" aria-label="Add task">
+                  <span aria-hidden="true">+</span>
                 </button>
-                <div id="spatial-more-menu" class="spatial-more-menu" role="menu" hidden>
-                  <button type="button" class="spatial-more-item" role="menuitem" data-action="copy">Copy todos</button>
-                  <button type="button" class="spatial-more-item" role="menuitem" data-action="paste">Paste to-dos</button>
-                </div>
               </div>
-            </div>
+            </form>
           </div>
           <div class="spatial-filters">
             <button type="button" class="spatial-filter-chip spatial-filter-chip--active" data-filter="all">All</button>
             <button type="button" class="spatial-filter-chip" data-filter="todo">To do</button>
             <button type="button" class="spatial-filter-chip" data-filter="done">Done</button>
-            <button type="button" class="spatial-filter-chip" data-filter="search" id="spatial-filter-search">
-              <svg class="spatial-filter-search-icon" width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="7" cy="7" r="5"/><line x1="11" y1="11" x2="15" y2="15"/></svg>
-              Search
-            </button>
           </div>
-          <div id="spatial-search-wrap" class="spatial-search-wrap" hidden>
-            <label for="spatial-search-input" class="sr-only">Search tasks</label>
-            <input
-              id="spatial-search-input"
-              class="spatial-search-input"
-              type="search"
-              placeholder="Search…"
-              aria-label="Search tasks"
-              autocomplete="off"
-            />
+          <button type="button" id="spatial-clear-done-btn" class="spatial-btn-clear-done spatial-btn--tertiary" aria-label="Delete all completed tasks" hidden>Clear done</button>
+        </div>
+        <div class="spatial-top-right">
+          <label for="spatial-search-input" class="sr-only">Search tasks</label>
+          <input
+            id="spatial-search-input"
+            class="spatial-search-input"
+            type="search"
+            placeholder="Search…"
+            aria-label="Search tasks"
+            autocomplete="off"
+          />
+          <div class="spatial-more-wrap">
+            <button type="button" id="spatial-more-btn" class="spatial-btn-circle spatial-btn-circle--more" aria-label="More options" aria-haspopup="menu" aria-expanded="false">
+              <span aria-hidden="true">⋮</span>
+            </button>
+            <div id="spatial-more-menu" class="spatial-more-menu" role="menu" hidden>
+              <button type="button" class="spatial-more-item" role="menuitem" data-action="copy">Copy todos</button>
+              <button type="button" class="spatial-more-item" role="menuitem" data-action="paste">Paste to-dos</button>
+            </div>
           </div>
         </div>
       </div>
       <div id="spatial-error" class="spatial-error" role="alert" hidden></div>
-      <div id="spatial-stage" class="spatial-stage" aria-live="polite"></div>
+      <div id="spatial-stage" class="spatial-stage" aria-live="polite">
+        <div id="spatial-empty-state" class="spatial-empty-state" role="status" aria-live="polite" hidden>
+          <p id="spatial-empty-state-text" class="spatial-empty-state-text"></p>
+        </div>
+      </div>
       <div id="spatial-auth-footer" class="spatial-auth-footer">
         <div id="auth-header" class="spatial-auth-header" aria-label="Account"></div>
       </div>

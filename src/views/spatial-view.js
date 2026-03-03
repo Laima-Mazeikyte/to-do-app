@@ -7,6 +7,7 @@ import {
   setTaskText as apiSetTaskText
 } from '../lib/todo-api.js'
 import { parsePastedList } from '../paste-list-parser.js'
+import { COPY } from '../copy.js'
 
 const Engine = Matter.Engine
 const World = Matter.World
@@ -46,8 +47,10 @@ export function initSpatialView(supabase) {
   const undoMsgEl = document.getElementById('spatial-undo-msg')
   const undoBtnEl = document.getElementById('spatial-undo-btn')
   const searchInputEl = document.getElementById('spatial-search-input')
-  const searchWrapEl = document.getElementById('spatial-search-wrap')
   const filterChips = document.querySelectorAll('.spatial-filter-chip')
+  const clearDoneBtn = document.getElementById('spatial-clear-done-btn')
+  const emptyStateEl = document.getElementById('spatial-empty-state')
+  const emptyStateTextEl = document.getElementById('spatial-empty-state-text')
   const moreBtn = document.getElementById('spatial-more-btn')
   const moreMenu = document.getElementById('spatial-more-menu')
 
@@ -62,9 +65,10 @@ export function initSpatialView(supabase) {
   const state = { tasks: [], error: null, loading: true }
   /** @type {{ task: { id: string, text: string, done: boolean }, timerId: number } | null} */
   let pendingDelete = null
+  /** @type {{ tasks: Array<{ id: string, text: string, done: boolean }>, timerId: number } | null} */
+  let pendingBulkClear = null
   /** @type {FilterMode} */
   let filterMode = 'all'
-  let searchActive = false
 
   function getStageRect() {
     return stageEl.getBoundingClientRect()
@@ -99,7 +103,114 @@ export function initSpatialView(supabase) {
   }
 
   function getVisibleTaskIds() {
-    return new Set(getVisibleTasks().map((t) => t.id))
+    const ids = new Set(getVisibleTasks().map((t) => t.id))
+    if (pendingDelete) ids.delete(pendingDelete.task.id)
+    if (pendingBulkClear) {
+      for (const t of pendingBulkClear.tasks) ids.delete(t.id)
+    }
+    return ids
+  }
+
+  function updateFilterHint() {
+    if (!clearDoneBtn) return
+    const doneCount = state.tasks.filter((t) => t.done).length
+    const show = (filterMode === 'all' || filterMode === 'done') && doneCount > 0
+    clearDoneBtn.textContent = COPY.clearDoneButton
+    clearDoneBtn.hidden = !show
+  }
+
+  function clearDoneTasks() {
+    const doneTasks = state.tasks.filter((t) => t.done)
+    if (doneTasks.length === 0) return
+
+    if (pendingDelete) {
+      window.clearTimeout(pendingDelete.timerId)
+      apiRemoveTask(pendingDelete.task.id).then(({ ok, error }) => {
+        if (!ok && error) showError(error)
+      })
+      const prevIdx = state.tasks.findIndex((t) => t.id === pendingDelete.task.id)
+      if (prevIdx !== -1) state.tasks.splice(prevIdx, 1)
+      pendingDelete = null
+    }
+    if (pendingBulkClear) {
+      window.clearTimeout(pendingBulkClear.timerId)
+      pendingBulkClear.tasks.forEach((t) => {
+        apiRemoveTask(t.id).then(({ ok, error }) => {
+          if (!ok && error) showError(error)
+        })
+        const idx = state.tasks.findIndex((x) => x.id === t.id)
+        if (idx !== -1) state.tasks.splice(idx, 1)
+      })
+      pendingBulkClear = null
+    }
+
+    for (const task of doneTasks) {
+      const entry = cardMap.get(task.id)
+      if (entry) {
+        World.remove(engine.world, entry.body)
+        entry.element.remove()
+        cardMap.delete(task.id)
+      }
+    }
+
+    const timerId = window.setTimeout(() => {
+      finalizeBulkClear()
+    }, DELETE_UNDO_MS)
+
+    pendingBulkClear = { tasks: doneTasks, timerId }
+    const msg =
+      doneTasks.length === 1
+        ? COPY.undoBulkClearOne
+        : COPY.undoBulkClearMany.replace('{{count}}', String(doneTasks.length))
+    if (undoMsgEl) undoMsgEl.textContent = msg
+    if (undoBarEl) undoBarEl.hidden = false
+
+    syncPileToFilter()
+    updateFilterHint()
+  }
+
+  async function finalizeBulkClear() {
+    if (!pendingBulkClear) return
+    const tasks = pendingBulkClear.tasks
+    window.clearTimeout(pendingBulkClear.timerId)
+    pendingBulkClear = null
+    hideUndoBar()
+
+    for (const task of tasks) {
+      const { ok, error } = await apiRemoveTask(task.id)
+      if (!ok && error) showError(error)
+      const idx = state.tasks.findIndex((t) => t.id === task.id)
+      if (idx !== -1) state.tasks.splice(idx, 1)
+    }
+
+    syncPileToFilter()
+    updateFilterHint()
+  }
+
+  function updateEmptyState() {
+    if (!emptyStateEl || !emptyStateTextEl) return
+    const visible = getVisibleTasks()
+    const searchQuery = (searchInputEl?.value ?? '').trim()
+    const hasSearch = searchQuery.length > 0
+
+    if (state.loading || visible.length > 0) {
+      emptyStateEl.hidden = true
+      return
+    }
+
+    let text
+    if (hasSearch) {
+      text = COPY.emptySearch.replace('{{query}}', searchQuery)
+    } else if (filterMode === 'all') {
+      text = COPY.emptyAll
+    } else if (filterMode === 'todo') {
+      text = COPY.emptyTodo
+    } else {
+      text = COPY.emptyDone
+    }
+
+    emptyStateTextEl.textContent = text
+    emptyStateEl.hidden = false
   }
 
   function copyVisibleTodosAsMarkdown() {
@@ -380,6 +491,9 @@ export function initSpatialView(supabase) {
       const x = centerX + (Math.random() - 0.5) * 60
       setTimeout(() => addCardToWorld(task, x, SPAWN_Y), i * 80)
     })
+
+    updateEmptyState()
+    updateFilterHint()
   }
 
   function runLoop() {
@@ -404,7 +518,7 @@ export function initSpatialView(supabase) {
   }
 
   function showUndoBar(taskText) {
-    if (undoMsgEl) undoMsgEl.textContent = `"${taskText}" moved to trash.`
+    if (undoMsgEl) undoMsgEl.textContent = COPY.undoSingleDelete.replace('{{task}}', taskText)
     if (undoBarEl) undoBarEl.hidden = false
   }
 
@@ -415,12 +529,22 @@ export function initSpatialView(supabase) {
 
     if (pendingDelete) {
       window.clearTimeout(pendingDelete.timerId)
-      const prevId = pendingDelete.task.id
-      apiRemoveTask(prevId).then(({ ok, error }) => {
+      apiRemoveTask(pendingDelete.task.id).then(({ ok, error }) => {
         if (!ok && error) showError(error)
       })
-      const prevIdx = state.tasks.findIndex((t) => t.id === prevId)
+      const prevIdx = state.tasks.findIndex((t) => t.id === pendingDelete.task.id)
       if (prevIdx !== -1) state.tasks.splice(prevIdx, 1)
+    }
+    if (pendingBulkClear) {
+      window.clearTimeout(pendingBulkClear.timerId)
+      pendingBulkClear.tasks.forEach((t) => {
+        apiRemoveTask(t.id).then(({ ok, error }) => {
+          if (!ok && error) showError(error)
+        })
+        const idx = state.tasks.findIndex((x) => x.id === t.id)
+        if (idx !== -1) state.tasks.splice(idx, 1)
+      })
+      pendingBulkClear = null
     }
 
     World.remove(engine.world, entry.body)
@@ -436,13 +560,21 @@ export function initSpatialView(supabase) {
   }
 
   function handleUndoClick() {
-    if (!pendingDelete) return
-    const { task, timerId } = pendingDelete
-    window.clearTimeout(timerId)
-    pendingDelete = null
-    hideUndoBar()
-    // Task is still in state.tasks (only removed on finalizeDelete), so just re-add the card
-    syncPileToFilter()
+    if (pendingDelete) {
+      const { timerId } = pendingDelete
+      window.clearTimeout(timerId)
+      pendingDelete = null
+      hideUndoBar()
+      syncPileToFilter()
+      return
+    }
+    if (pendingBulkClear) {
+      window.clearTimeout(pendingBulkClear.timerId)
+      pendingBulkClear = null
+      hideUndoBar()
+      syncPileToFilter()
+      updateFilterHint()
+    }
   }
 
   function startEdit(cardEl, task) {
@@ -645,33 +777,23 @@ export function initSpatialView(supabase) {
     filterMode = mode
     filterChips.forEach((chip) => {
       const chipFilter = chip.dataset.filter
-      const active = chipFilter === mode || (chipFilter === 'search' && searchActive)
-      chip.classList.toggle('spatial-filter-chip--active', active)
+      chip.classList.toggle('spatial-filter-chip--active', chipFilter === mode)
     })
+    updateFilterHint()
     syncPileToFilter()
   }
 
-  function toggleSearch() {
-    searchActive = !searchActive
-    if (searchWrapEl) {
-      searchWrapEl.hidden = !searchActive
-      if (searchActive) searchInputEl?.focus()
-      else if (searchInputEl) searchInputEl.value = ''
-    }
-    setFilterMode(filterMode)
-  }
-
   function setupFilters() {
+    updateFilterHint()
     filterChips.forEach((chip) => {
       chip.addEventListener('click', () => {
         const mode = chip.dataset.filter
-        if (mode === 'search') {
-          toggleSearch()
-        } else {
-          setFilterMode(/** @type {FilterMode} */ (mode))
-        }
+        setFilterMode(/** @type {FilterMode} */ (mode))
       })
     })
+    if (clearDoneBtn) {
+      clearDoneBtn.addEventListener('click', () => clearDoneTasks())
+    }
     if (searchInputEl) {
       searchInputEl.addEventListener('input', () => syncPileToFilter())
     }
@@ -720,7 +842,6 @@ export function initSpatialView(supabase) {
     }
     state.tasks = data || []
     state.loading = false
-    if (state.tasks.length === 0) return
     syncPileToFilter()
   }
 
@@ -783,6 +904,7 @@ export function initSpatialView(supabase) {
       loadInitialTasks()
     } else {
       state.loading = false
+      syncPileToFilter()
       console.info('[To-Do Spatial] No Supabase – add .env and restart to persist.')
     }
   })
