@@ -9,13 +9,19 @@
       (function () {
         var s = typeof localStorage !== 'undefined' && localStorage.getItem('spatial-theme');
         var useDark = s === 'dark' || ((s === null || s === 'system') && window.matchMedia('(prefers-color-scheme: dark)').matches);
-        if (useDark) document.documentElement.classList.add('dark');
+        var root = document.documentElement;
+        if (useDark) root.classList.add('dark');
+        root.style.colorScheme = useDark ? 'dark' : 'light';
       })();
     </script>
   </head>
   <body>
     <div id="app" class="spatial-app">
       <div class="spatial-floating-top">
+        <button type="button" id="spatial-cleanup-toggle" class="spatial-gravity-toggle" aria-label="Toggle gravity mode" aria-pressed="false">
+          <span id="spatial-gravity-label" class="spatial-gravity-label">Gravity mode: On</span>
+          <span id="spatial-gravity-hint" class="spatial-gravity-hint" hidden>Move cards around freely</span>
+        </button>
         <div class="spatial-top-spacer"></div>
         <div class="spatial-top-center">
           <div class="spatial-add-row">
@@ -140,7 +146,6 @@
         <div id="spatial-undo-timer" class="spatial-undo-timer" role="presentation" aria-hidden="true"></div>
         <span id="spatial-undo-msg" class="spatial-undo-msg"></span>
         <button type="button" id="spatial-undo-btn" class="spatial-undo-btn spatial-btn--tertiary" aria-label="Undo delete">Undo</button>
-        <button type="button" id="spatial-undo-dismiss" class="spatial-undo-dismiss" aria-label="Dismiss and finalize">×</button>
       </div>
     </div>
     <script type="module" src="/src/spatial-main.js"></script>

@@ -44,6 +44,7 @@ function applyTheme() {
   const root = document.documentElement
   const isDark = getResolvedTheme() === 'dark'
   root.classList.toggle('dark', isDark)
+  root.style.colorScheme = isDark ? 'dark' : 'light'
 }
 
 /** Run once on load; also sets up system preference listener. */

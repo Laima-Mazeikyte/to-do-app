@@ -42,6 +42,9 @@
 }
 
 .spatial-top-center {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
   flex: none;
   display: flex;
   flex-direction: column;
@@ -117,9 +120,8 @@
   width: 2rem;
   height: 2rem;
   margin: var(--space-1);
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  display: grid;
+  place-items: center;
   border-radius: 9999px;
   border: none;
   cursor: pointer;
@@ -138,9 +140,8 @@
 .spatial-btn-circle {
   width: 2.25rem;
   height: 2.25rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  display: grid;
+  place-items: center;
   border-radius: 9999px;
   border: none;
   cursor: pointer;
@@ -162,6 +163,32 @@
   background: var(--background-muted);
 }
 
+.spatial-gravity-toggle {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: var(--space-1) var(--space-2);
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: var(--font-size-sm);
+  color: var(--foreground-default);
+  text-align: left;
+}
+.spatial-gravity-toggle:hover {
+  color: var(--accent-default);
+}
+.spatial-gravity-label {
+  font-weight: 500;
+}
+.spatial-gravity-hint {
+  font-size: 0.75rem;
+  color: var(--foreground-muted);
+  margin-top: var(--space-1);
+  font-weight: 400;
+}
 
 /* Auth footer: below stage, acts as floor/wall – cards must not overlap it */
 .spatial-auth-footer {
@@ -299,57 +326,89 @@ html.dark .spatial-more-color[data-color="sage"] { background: var(--colorway-sa
 
 .spatial-app[data-bg="warm"] {
   --background-subtle: var(--colorway-warm-bg-light);
+  --background-default: var(--colorway-warm-surface-light);
+  --background-muted: var(--colorway-warm-surface-muted-light);
   --done-card-bg: var(--colorway-warm-done-bg-light);
+  --done-card-text: var(--colorway-warm-done-text-light);
   --card-border: var(--colorway-warm-card-border-light);
+  --border-default: var(--colorway-warm-card-border-light);
   --accent-default: var(--colorway-warm-accent-light);
   --accent-emphasis: var(--colorway-warm-accent-light-hover);
 }
 html.dark .spatial-app[data-bg="warm"] {
   --background-subtle: var(--colorway-warm-bg-dark);
+  --background-default: var(--colorway-warm-surface-dark);
+  --background-muted: var(--colorway-warm-surface-muted-dark);
   --done-card-bg: var(--colorway-warm-done-bg-dark);
+  --done-card-text: var(--colorway-warm-done-text-dark);
   --card-border: var(--colorway-warm-card-border-dark);
+  --border-default: var(--colorway-warm-card-border-dark);
   --accent-default: var(--colorway-warm-accent-dark);
   --accent-emphasis: var(--colorway-warm-accent-dark-hover);
 }
 .spatial-app[data-bg="sand"] {
   --background-subtle: var(--colorway-sand-bg-light);
+  --background-default: var(--colorway-sand-surface-light);
+  --background-muted: var(--colorway-sand-surface-muted-light);
   --done-card-bg: var(--colorway-sand-done-bg-light);
+  --done-card-text: var(--colorway-sand-done-text-light);
   --card-border: var(--colorway-sand-card-border-light);
+  --border-default: var(--colorway-sand-card-border-light);
   --accent-default: var(--colorway-sand-accent-light);
   --accent-emphasis: var(--colorway-sand-accent-light-hover);
 }
 html.dark .spatial-app[data-bg="sand"] {
   --background-subtle: var(--colorway-sand-bg-dark);
+  --background-default: var(--colorway-sand-surface-dark);
+  --background-muted: var(--colorway-sand-surface-muted-dark);
   --done-card-bg: var(--colorway-sand-done-bg-dark);
+  --done-card-text: var(--colorway-sand-done-text-dark);
   --card-border: var(--colorway-sand-card-border-dark);
+  --border-default: var(--colorway-sand-card-border-dark);
   --accent-default: var(--colorway-sand-accent-dark);
   --accent-emphasis: var(--colorway-sand-accent-dark-hover);
 }
 .spatial-app[data-bg="lavender"] {
   --background-subtle: var(--colorway-lavender-bg-light);
+  --background-default: var(--colorway-lavender-surface-light);
+  --background-muted: var(--colorway-lavender-surface-muted-light);
   --done-card-bg: var(--colorway-lavender-done-bg-light);
+  --done-card-text: var(--colorway-lavender-done-text-light);
   --card-border: var(--colorway-lavender-card-border-light);
+  --border-default: var(--colorway-lavender-card-border-light);
   --accent-default: var(--colorway-lavender-accent-light);
   --accent-emphasis: var(--colorway-lavender-accent-light-hover);
 }
 html.dark .spatial-app[data-bg="lavender"] {
   --background-subtle: var(--colorway-lavender-bg-dark);
+  --background-default: var(--colorway-lavender-surface-dark);
+  --background-muted: var(--colorway-lavender-surface-muted-dark);
   --done-card-bg: var(--colorway-lavender-done-bg-dark);
+  --done-card-text: var(--colorway-lavender-done-text-dark);
   --card-border: var(--colorway-lavender-card-border-dark);
+  --border-default: var(--colorway-lavender-card-border-dark);
   --accent-default: var(--colorway-lavender-accent-dark);
   --accent-emphasis: var(--colorway-lavender-accent-dark-hover);
 }
 .spatial-app[data-bg="sage"] {
   --background-subtle: var(--colorway-sage-bg-light);
+  --background-default: var(--colorway-sage-surface-light);
+  --background-muted: var(--colorway-sage-surface-muted-light);
   --done-card-bg: var(--colorway-sage-done-bg-light);
+  --done-card-text: var(--colorway-sage-done-text-light);
   --card-border: var(--colorway-sage-card-border-light);
+  --border-default: var(--colorway-sage-card-border-light);
   --accent-default: var(--colorway-sage-accent-light);
   --accent-emphasis: var(--colorway-sage-accent-light-hover);
 }
 html.dark .spatial-app[data-bg="sage"] {
   --background-subtle: var(--colorway-sage-bg-dark);
+  --background-default: var(--colorway-sage-surface-dark);
+  --background-muted: var(--colorway-sage-surface-muted-dark);
   --done-card-bg: var(--colorway-sage-done-bg-dark);
+  --done-card-text: var(--colorway-sage-done-text-dark);
   --card-border: var(--colorway-sage-card-border-dark);
+  --border-default: var(--colorway-sage-card-border-dark);
   --accent-default: var(--colorway-sage-accent-dark);
   --accent-emphasis: var(--colorway-sage-accent-dark-hover);
 }
@@ -526,9 +585,8 @@ html.dark .spatial-app[data-bg="sage"] {
   width: 2rem;
   height: 2rem;
   margin: var(--space-1);
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  display: grid;
+  place-items: center;
   border-radius: 9999px;
   border: none;
   background: transparent;
@@ -698,7 +756,7 @@ html.dark .spatial-app[data-bg="sage"] {
   background-color: var(--done-card-bg);
 }
 .spatial-card--done .spatial-card-text {
-  color: var(--foreground-muted);
+  color: var(--done-card-text);
 }
 
 .spatial-card-edit-wrap {
@@ -1091,24 +1149,3 @@ body.auth-drawer-open {
   flex-shrink: 0;
 }
 
-.spatial-undo-dismiss {
-  flex-shrink: 0;
-  width: 1.5rem;
-  height: 1.5rem;
-  padding: 0;
-  border: none;
-  background: transparent;
-  color: var(--foreground-muted);
-  font-size: 1.25rem;
-  line-height: 1;
-  cursor: pointer;
-  border-radius: var(--radius-md);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.spatial-undo-dismiss:hover {
-  color: var(--foreground-default);
-  background: var(--background-muted);
-}

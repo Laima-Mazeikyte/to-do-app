@@ -4,27 +4,27 @@
  */
 export const COPY = {
   /** Button to clear all visible tasks (respects filter and search) */
-  clearVisibleButton: 'Clear all',
+  clearVisibleButton: 'Remove all',
 
   /** Undo bar: single task deleted. {{task}} = task text */
-  undoSingleDelete: '"{{task}}" moved to trash.',
+  undoSingleDelete: '"{{task}}" removed.',
 
   /** Undo bar: bulk clear – 1 task. Shown when exactly one visible task was cleared */
-  undoBulkClearOne: 'Cleared 1 task.',
+  undoBulkClearOne: 'Removed 1 to-do.',
 
   /** Undo bar: bulk clear – many. {{count}} = number of tasks cleared */
-  undoBulkClearMany: 'Cleared {{count}} tasks.',
+  undoBulkClearMany: 'Removed {{count}} to-dos.',
 
   /** Empty state: no tasks at all (filter: All). Prefix before the clickable trigger. */
-  emptyAllPrefix: 'Start adding by adding a to-do or',
+  emptyAllPrefix: 'Start by adding a to-do or',
   /** Empty state: clickable trigger that opens the Paste to-dos drawer */
   emptyAllPasteTrigger: 'paste a to-do list',
 
   /** Empty state: no to-do tasks (filter: To do) */
-  emptyTodo: 'All done! Nothing left to do.',
+  emptyTodo: 'All done! Nothing left to do!',
 
   /** Empty state: no done tasks (filter: Done) */
-  emptyDone: 'No completed todos yet.',
+  emptyDone: 'No completed to-dos yet.',
 
   /** Empty state: search returned no results. {{query}} is replaced with the search term. */
   emptySearch: 'No results for "{{query}}".',
@@ -61,4 +61,13 @@ export const COPY = {
 
   /** More menu: Sign out item */
   moreSignOut: 'Sign out',
+
+  /** Gravity mode: when physics is on */
+  gravityModeOn: 'Gravity mode: On',
+
+  /** Gravity mode: when physics is off (cleanup mode) */
+  gravityModeOff: 'Gravity mode: Off',
+
+  /** Hint shown under gravity mode when off */
+  gravityModeHint: 'Move cards around freely',
 }

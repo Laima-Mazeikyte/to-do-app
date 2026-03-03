@@ -3,6 +3,7 @@
    ============================================ */
 
 :root {
+  color-scheme: light;
   /* ----- Primitives: colors (warm grays) ----- */
   --color-white: #ffffff;
   --color-gray-50: #fafaf9;
@@ -27,8 +28,14 @@
   /* Warm (warm blue) */
   --colorway-warm-bg-light: #e8ecf4;
   --colorway-warm-bg-dark: #2d3240;
+  --colorway-warm-surface-light: #f4f6fa;
+  --colorway-warm-surface-dark: #363d4a;
+  --colorway-warm-surface-muted-light: #eef2f8;
+  --colorway-warm-surface-muted-dark: #2f3540;
   --colorway-warm-done-bg-light: #e0e6f0;
-  --colorway-warm-done-bg-dark: #252a35;
+  --colorway-warm-done-bg-dark: #32384a;
+  --colorway-warm-done-text-light: #4a5a68;
+  --colorway-warm-done-text-dark: #8a9aab;
   --colorway-warm-card-border-light: #a8b8c8;
   --colorway-warm-card-border-dark: #3d4a5a;
   --colorway-warm-accent-light: #4a6b8a;
@@ -37,20 +44,32 @@
   --colorway-warm-accent-dark-hover: #4a6b8a;
   /* Sand */
   --colorway-sand-bg-light: #fde6d0;
-  --colorway-sand-bg-dark: #42392f;
-  --colorway-sand-done-bg-light: #fdf0e4;
-  --colorway-sand-done-bg-dark: #3a3228;
+  --colorway-sand-bg-dark: #3d2e24;
+  --colorway-sand-surface-light: #fef4eb;
+  --colorway-sand-surface-dark: #4d3a2e;
+  --colorway-sand-surface-muted-light: #fdf0e4;
+  --colorway-sand-surface-muted-dark: #402e24;
+  --colorway-sand-done-bg-light: #f9e4d4;
+  --colorway-sand-done-bg-dark: #453629;
+  --colorway-sand-done-text-light: #7a5a38;
+  --colorway-sand-done-text-dark: #b8956a;
   --colorway-sand-card-border-light: #d4b898;
-  --colorway-sand-card-border-dark: #5a4a3d;
+  --colorway-sand-card-border-dark: #6b5344;
   --colorway-sand-accent-light: #b45309;
   --colorway-sand-accent-light-hover: #92400e;
-  --colorway-sand-accent-dark: #d97706;
-  --colorway-sand-accent-dark-hover: #b45309;
+  --colorway-sand-accent-dark: #c4690a;
+  --colorway-sand-accent-dark-hover: #a85a08;
   /* Lavender (warm mauve) */
   --colorway-lavender-bg-light: #f6e9f4;
   --colorway-lavender-bg-dark: #38283d;
-  --colorway-lavender-done-bg-light: #f4eaf2;
-  --colorway-lavender-done-bg-dark: #32283a;
+  --colorway-lavender-surface-light: #faf2f8;
+  --colorway-lavender-surface-dark: #3f3045;
+  --colorway-lavender-surface-muted-light: #f4eaf2;
+  --colorway-lavender-surface-muted-dark: #32283a;
+  --colorway-lavender-done-bg-light: #f0e0ec;
+  --colorway-lavender-done-bg-dark: #362d3e;
+  --colorway-lavender-done-text-light: #6a4a78;
+  --colorway-lavender-done-text-dark: #b89ac4;
   --colorway-lavender-card-border-light: #c8a8c8;
   --colorway-lavender-card-border-dark: #4a3d5a;
   --colorway-lavender-accent-light: #8b5a9e;
@@ -60,8 +79,14 @@
   /* Sage (warm moss) */
   --colorway-sage-bg-light: #eaf0e6;
   --colorway-sage-bg-dark: #252d24;
-  --colorway-sage-done-bg-light: #e6f0e8;
-  --colorway-sage-done-bg-dark: #1a2520;
+  --colorway-sage-surface-light: #f2f8ef;
+  --colorway-sage-surface-dark: #2e3630;
+  --colorway-sage-surface-muted-light: #eef4ea;
+  --colorway-sage-surface-muted-dark: #232b22;
+  --colorway-sage-done-bg-light: #e0eed8;
+  --colorway-sage-done-bg-dark: #232d28;
+  --colorway-sage-done-text-light: #2d5a38;
+  --colorway-sage-done-text-dark: #6a9a78;
   --colorway-sage-card-border-light: #a8c0a8;
   --colorway-sage-card-border-dark: #3d4a3d;
   --colorway-sage-accent-light: #3d6b4a;
@@ -128,6 +153,7 @@
   --accent-emphasis: var(--color-accent-light-hover);
 
   --done-card-bg: var(--colorway-warm-done-bg-light);
+  --done-card-text: var(--colorway-warm-done-text-light);
   --card-border: var(--colorway-warm-card-border-light);
 
   --success-default: var(--color-green-500);
@@ -155,6 +181,7 @@
   --accent-emphasis: var(--color-accent-dark-hover);
 
   --done-card-bg: var(--colorway-warm-done-bg-dark);
+  --done-card-text: var(--colorway-warm-done-text-dark);
   --card-border: var(--colorway-warm-card-border-dark);
 
   --success-default: var(--color-green-500);

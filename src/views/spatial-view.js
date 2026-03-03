@@ -25,6 +25,8 @@ const CARD_MAX_HEIGHT = 120
 const FLOOR_HEIGHT = 60
 const SPAWN_Y = 72
 const GRAVITY = 0.8
+const GRID_GAP = 16
+const CLEANUP_STORAGE_KEY = 'spatial-cleanup-mode'
 
 /** @typedef {'all' | 'todo' | 'done'} FilterMode */
 
@@ -50,7 +52,6 @@ export function initSpatialView(supabase, options = {}) {
   const undoTimerEl = document.getElementById('spatial-undo-timer')
   const undoMsgEl = document.getElementById('spatial-undo-msg')
   const undoBtnEl = document.getElementById('spatial-undo-btn')
-  const undoDismissEl = document.getElementById('spatial-undo-dismiss')
   const searchInputEl = document.getElementById('spatial-search-input')
   const filterChips = document.querySelectorAll('.spatial-filter-chip')
   const clearDoneBtn = document.getElementById('spatial-clear-done-btn')
@@ -61,6 +62,10 @@ export function initSpatialView(supabase, options = {}) {
   const copyToastEl = document.getElementById('spatial-copy-toast')
   const copyToastTextEl = document.getElementById('spatial-copy-toast-text')
   const appEl = document.getElementById('app')
+  const cleanupToggleEl = document.getElementById('spatial-cleanup-toggle')
+  const gravityLabelEl = document.getElementById('spatial-gravity-label')
+  const gravityHintEl = document.getElementById('spatial-gravity-hint')
+  const floatingTopEl = document.querySelector('.spatial-floating-top')
 
   let engine = null
   let floor = null
@@ -68,7 +73,7 @@ export function initSpatialView(supabase, options = {}) {
   let rightWall = null
   let topWall = null
   let animationId = null
-  /** @type {Map<string, { body: Matter.Body, element: HTMLElement, task: { id: string, text: string, done: boolean } }>} */
+  /** @type {Map<string, { body: Matter.Body | null, element: HTMLElement, task: { id: string, text: string, done: boolean } }>} */
   const cardMap = new Map()
   const state = { tasks: [], error: null, loading: true }
   /** @type {{ task: { id: string, text: string, done: boolean }, timerId: number } | null} */
@@ -77,6 +82,11 @@ export function initSpatialView(supabase, options = {}) {
   let pendingBulkClear = null
   /** @type {FilterMode} */
   let filterMode = 'all'
+  /** @type {boolean} */
+  let cleanupMode =
+    typeof localStorage !== 'undefined' && localStorage.getItem(CLEANUP_STORAGE_KEY) === 'true'
+  /** @type {Map<string, { x: number, y: number }>} Stored positions for cleanup mode (persists across filter changes) */
+  const cleanupPositions = new Map()
   /** @type {number | undefined} */
   let copyToastTimeout
 
@@ -90,6 +100,14 @@ export function initSpatialView(supabase, options = {}) {
     const stageRect = getStageRect()
     const footerRect = footerEl.getBoundingClientRect()
     return footerRect.top - stageRect.top
+  }
+
+  /** Y coordinate (in stage space) for the bottom of the toolbar – cards must not go above this. */
+  function getToolbarBottomY() {
+    if (!floatingTopEl) return GRID_GAP
+    const stageRect = getStageRect()
+    const toolbarRect = floatingTopEl.getBoundingClientRect()
+    return toolbarRect.bottom - stageRect.top + GRID_GAP
   }
 
   function showError(message) {
@@ -157,7 +175,7 @@ export function initSpatialView(supabase, options = {}) {
     for (const task of visibleTasks) {
       const entry = cardMap.get(task.id)
       if (entry) {
-        World.remove(engine.world, entry.body)
+        if (entry.body && engine) World.remove(engine.world, entry.body)
         entry.element.remove()
         cardMap.delete(task.id)
       }
@@ -442,6 +460,230 @@ export function initSpatialView(supabase, options = {}) {
     setupDrag(element, body, task.id)
   }
 
+  function addCardToGrid(task) {
+    const element = createCardElement(task)
+    element.style.position = 'absolute'
+    element.style.left = '0'
+    element.style.top = '0'
+    element.style.transform = 'translate(-50%, -50%)'
+    stageEl.appendChild(element)
+    cardMap.set(task.id, { body: null, element, task })
+    setupCleanupDrag(element, task.id)
+  }
+
+  /** Check if two axis-aligned boxes overlap (with optional gap). */
+  function boxesOverlap(cx1, cy1, w1, h1, cx2, cy2, w2, h2, gap = 0) {
+    const margin = gap / 2
+    return (
+      cx1 - w1 / 2 - margin < cx2 + w2 / 2 + margin &&
+      cx1 + w1 / 2 + margin > cx2 - w2 / 2 - margin &&
+      cy1 - h1 / 2 - margin < cy2 + h2 / 2 + margin &&
+      cy1 + h1 / 2 + margin > cy2 - h2 / 2 - margin
+    )
+  }
+
+  /** Cloud layout: place cards in spirals, grouping done vs todo. Preserves positions across filter changes. */
+  function layoutGridInCleanupMode() {
+    const rect = getStageRect()
+    const toolbarBottom = getToolbarBottomY()
+    const footerTopY = getFooterTopY()
+    const maxY = footerTopY - CARD_MIN_HEIGHT
+    const centerX = rect.width / 2
+    const centerY = (toolbarBottom + maxY) / 2
+    const padding = GRID_GAP
+    const clusterOffset = Math.min(100, rect.width * 0.15)
+    const todoClusterX = centerX - clusterOffset
+    const doneClusterX = centerX + clusterOffset
+
+    const visibleTasks = getVisibleTasks()
+    const visibleIds = getVisibleTaskIds()
+    const allEntries = visibleTasks
+      .filter((t) => visibleIds.has(t.id))
+      .map((t) => cardMap.get(t.id))
+      .filter((e) => e && e.body === null)
+
+    const todoEntries = allEntries.filter((e) => !e.task.done)
+    const doneEntries = allEntries.filter((e) => e.task.done)
+
+    const goldenAngle = (2 * Math.PI * 137.5) / 360
+    const radiusStep = 40
+    const placed = []
+
+    function placeGroup(entries, clusterX) {
+      entries.forEach(({ element, task }, i) => {
+        const taskId = task.id
+        const w = element.offsetWidth
+        const h = element.offsetHeight
+        const halfW = w / 2
+        const halfH = h / 2
+
+        const stored = cleanupPositions.get(taskId)
+        let cx, cy
+
+        if (stored) {
+          cx = Math.max(halfW + padding, Math.min(rect.width - halfW - padding, stored.x))
+          cy = Math.max(toolbarBottom + halfH, Math.min(maxY - halfH, stored.y))
+        } else {
+          let radius = padding + Math.sqrt(i + 1) * radiusStep
+          const angle = i * goldenAngle
+          const maxAttempts = 50
+
+          for (let attempt = 0; attempt < maxAttempts; attempt++) {
+            const jitter = attempt === 0 ? (0.9 + ((i * 17) % 11) / 55) : 1
+            const r = radius * jitter
+            cx = clusterX + Math.cos(angle + attempt * 0.1) * r
+            cy = centerY + Math.sin(angle + attempt * 0.1) * r
+
+            cx = Math.max(halfW + padding, Math.min(rect.width - halfW - padding, cx))
+            cy = Math.max(toolbarBottom + halfH, Math.min(maxY - halfH, cy))
+
+            const overlaps = placed.some((p) =>
+              boxesOverlap(cx, cy, w, h, p.cx, p.cy, p.w, p.h, GRID_GAP)
+            )
+            if (!overlaps) break
+            radius += radiusStep * 0.6
+          }
+          cleanupPositions.set(taskId, { x: cx, y: cy })
+        }
+
+        placed.push({ cx, cy, w, h })
+        element.style.left = cx + 'px'
+        element.style.top = cy + 'px'
+        element.style.transform = 'translate(-50%, -50%)'
+      })
+    }
+
+    placeGroup(todoEntries, todoClusterX)
+    placeGroup(doneEntries, doneClusterX)
+  }
+
+  function setupCleanupDrag(cardEl, taskId) {
+    const handleEl = cardEl.querySelector('.spatial-card-handle')
+    if (!handleEl) return
+    let dragging = false
+    let offsetX = 0
+    let offsetY = 0
+
+    function getStageCoords(clientX, clientY) {
+      const rect = getStageRect()
+      return { x: clientX - rect.left, y: clientY - rect.top }
+    }
+
+    function onPointerDown(e) {
+      if (e.target !== handleEl && !handleEl.contains(e.target)) return
+      e.preventDefault()
+      const rect = getStageRect()
+      const left = parseFloat(cardEl.style.left) || 0
+      const top = parseFloat(cardEl.style.top) || 0
+      const coords = getStageCoords(e.clientX, e.clientY)
+      offsetX = coords.x - left
+      offsetY = coords.y - top
+      dragging = true
+      document.addEventListener('pointermove', onPointerMove)
+      document.addEventListener('pointerup', onPointerUp)
+      document.addEventListener('pointercancel', onPointerUp)
+    }
+
+    function onPointerMove(e) {
+      if (!dragging) return
+      const coords = getStageCoords(e.clientX, e.clientY)
+      const rect = getStageRect()
+      const toolbarBottom = getToolbarBottomY()
+      const footerTopY = getFooterTopY()
+      const halfW = cardEl.offsetWidth / 2
+      const halfH = cardEl.offsetHeight / 2
+      const minY = toolbarBottom + halfH
+      const maxY = footerTopY - halfH
+      const x = Math.max(halfW, Math.min(rect.width - halfW, coords.x - offsetX))
+      const y = Math.max(minY, Math.min(maxY, coords.y - offsetY))
+      cardEl.style.left = x + 'px'
+      cardEl.style.top = y + 'px'
+    }
+
+    function onPointerUp() {
+      if (!dragging) return
+      dragging = false
+      document.removeEventListener('pointermove', onPointerMove)
+      document.removeEventListener('pointerup', onPointerUp)
+      document.removeEventListener('pointercancel', onPointerUp)
+      const x = parseFloat(cardEl.style.left) || 0
+      const y = parseFloat(cardEl.style.top) || 0
+      cleanupPositions.set(taskId, { x, y })
+    }
+
+    handleEl.addEventListener('pointerdown', onPointerDown)
+  }
+
+  function applyCleanupMode() {
+    if (cleanupMode) {
+      for (const [id, entry] of [...cardMap.entries()]) {
+        if (entry.body && engine) {
+          World.remove(engine.world, entry.body)
+          const handleEl = entry.element.querySelector('.spatial-card-handle')
+          if (handleEl) {
+            const newHandle = handleEl.cloneNode(true)
+            handleEl.parentNode?.replaceChild(newHandle, handleEl)
+          }
+          cardMap.set(id, { body: null, element: entry.element, task: entry.task })
+          setupCleanupDrag(entry.element, id)
+        }
+      }
+      layoutGridInCleanupMode()
+      if (stageEl) stageEl.dataset.cleanup = 'true'
+    } else {
+      const rect = getStageRect()
+      for (const [id, entry] of [...cardMap.entries()]) {
+        if (entry.body === null) {
+          const handleEl = entry.element.querySelector('.spatial-card-handle')
+          if (handleEl) {
+            const newHandle = handleEl.cloneNode(true)
+            handleEl.parentNode?.replaceChild(newHandle, handleEl)
+          }
+          const left = parseFloat(entry.element.style.left) || rect.width / 2
+          const top = parseFloat(entry.element.style.top) || SPAWN_Y
+          const w = Math.max(CARD_MIN_WIDTH, Math.min(CARD_MAX_WIDTH, entry.element.offsetWidth))
+          const h = Math.max(CARD_MIN_HEIGHT, entry.element.offsetHeight)
+          const body = createCardBody(left, top, w, h)
+          body.cardWidth = w
+          body.cardHeight = h
+          World.add(engine.world, body)
+          cardMap.set(id, { body, element: entry.element, task: entry.task })
+          setupDrag(entry.element, body, id)
+        }
+      }
+      if (stageEl) stageEl.removeAttribute('data-cleanup')
+    }
+    if (cleanupToggleEl) {
+      cleanupToggleEl.setAttribute('aria-pressed', String(cleanupMode))
+      cleanupToggleEl.setAttribute('aria-label', cleanupMode ? COPY.gravityModeOff : COPY.gravityModeOn)
+    }
+    if (gravityLabelEl) {
+      gravityLabelEl.textContent = cleanupMode ? COPY.gravityModeOff : COPY.gravityModeOn
+    }
+    if (gravityHintEl) {
+      gravityHintEl.hidden = !cleanupMode
+      gravityHintEl.textContent = COPY.gravityModeHint
+    }
+  }
+
+  function setupCleanupToggle() {
+    if (!cleanupToggleEl) return
+    cleanupToggleEl.setAttribute('aria-pressed', String(cleanupMode))
+    cleanupToggleEl.setAttribute('aria-label', cleanupMode ? COPY.gravityModeOff : COPY.gravityModeOn)
+    if (gravityLabelEl) {
+      gravityLabelEl.textContent = cleanupMode ? COPY.gravityModeOff : COPY.gravityModeOn
+    }
+    if (gravityHintEl) {
+      gravityHintEl.hidden = !cleanupMode
+      gravityHintEl.textContent = COPY.gravityModeHint
+    }
+    cleanupToggleEl.addEventListener('click', () => {
+      cleanupMode = !cleanupMode
+      localStorage.setItem(CLEANUP_STORAGE_KEY, String(cleanupMode))
+      applyCleanupMode()
+    })
+  }
+
   function setupDrag(cardEl, body, taskId) {
     const handleEl = cardEl.querySelector('.spatial-card-handle')
     if (!handleEl) return
@@ -516,9 +758,11 @@ export function initSpatialView(supabase, options = {}) {
 
   let syncFrameCount = 0
   function syncBodyToDom() {
+    if (cleanupMode) return
     const rect = getStageRect()
     if (rect.width < 10 || rect.height < 10) return
     for (const [, { body, element }] of cardMap) {
+      if (!body) continue
       clampBodyToStage(body)
       element.style.left = body.position.x + 'px'
       element.style.top = body.position.y + 'px'
@@ -551,9 +795,8 @@ export function initSpatialView(supabase, options = {}) {
     // #endregion
   }
 
-  /** Sync the physics pile to the current filter: remove filtered-out cards, add filtered-in cards. */
+  /** Sync the pile to the current filter: remove filtered-out cards, add filtered-in cards. */
   function syncPileToFilter() {
-    if (!engine) return
     const visibleIds = getVisibleTaskIds()
     const rect = getStageRect()
     const centerX = rect.width / 2
@@ -561,7 +804,7 @@ export function initSpatialView(supabase, options = {}) {
     // Remove cards that no longer match the filter
     for (const [id, entry] of [...cardMap.entries()]) {
       if (!visibleIds.has(id)) {
-        World.remove(engine.world, entry.body)
+        if (entry.body && engine) World.remove(engine.world, entry.body)
         entry.element.remove()
         cardMap.delete(id)
       }
@@ -569,10 +812,15 @@ export function initSpatialView(supabase, options = {}) {
 
     // Add cards that should be visible but aren't in the pile
     const toAdd = state.tasks.filter((t) => visibleIds.has(t.id) && !cardMap.has(t.id))
-    toAdd.forEach((task, i) => {
-      const x = centerX + (Math.random() - 0.5) * 60
-      setTimeout(() => addCardToWorld(task, x, SPAWN_Y), i * 80)
-    })
+    if (cleanupMode) {
+      toAdd.forEach((task) => addCardToGrid(task))
+      layoutGridInCleanupMode()
+    } else if (engine) {
+      toAdd.forEach((task, i) => {
+        const x = centerX + (Math.random() - 0.5) * 60
+        setTimeout(() => addCardToWorld(task, x, SPAWN_Y), i * 80)
+      })
+    }
 
     updateEmptyState()
     updateFilterHint()
@@ -599,7 +847,7 @@ export function initSpatialView(supabase, options = {}) {
     }
     // #endregion
     lastUpdateTime = t
-    Engine.update(engine, delta)
+    if (!cleanupMode && engine) Engine.update(engine, delta)
     syncBodyToDom()
     animationId = requestAnimationFrame(runLoop)
   }
@@ -658,7 +906,7 @@ export function initSpatialView(supabase, options = {}) {
       pendingBulkClear = null
     }
 
-    World.remove(engine.world, entry.body)
+    if (entry.body && engine) World.remove(engine.world, entry.body)
     entry.element.remove()
     cardMap.delete(id)
 
@@ -688,16 +936,6 @@ export function initSpatialView(supabase, options = {}) {
     }
   }
 
-  function handleDismissClick() {
-    if (pendingDelete) {
-      finalizeDelete(pendingDelete.task.id)
-      return
-    }
-    if (pendingBulkClear) {
-      finalizeBulkClear()
-    }
-  }
-
   function startEdit(cardEl, task) {
     const entry = cardMap.get(task.id)
     if (!entry) return
@@ -708,17 +946,24 @@ export function initSpatialView(supabase, options = {}) {
     const controls = textSpan.parentNode
     if (!controls) return
 
-    const savedX = body.position.x
-    const savedY = body.position.y
-    Body.setStatic(body, true)
-    Body.setAngle(body, 0)
+    const savedX = body ? body.position.x : parseFloat(cardEl.style.left) || 0
+    const savedY = body ? body.position.y : parseFloat(cardEl.style.top) || 0
+    if (body) {
+      Body.setStatic(body, true)
+      Body.setAngle(body, 0)
+    }
 
     cardEl.classList.add('spatial-card--editing')
 
     const exitEditMode = () => {
       cardEl.classList.remove('spatial-card--editing')
-      Body.setPosition(body, { x: savedX, y: savedY })
-      Body.setStatic(body, false)
+      if (body) {
+        Body.setPosition(body, { x: savedX, y: savedY })
+        Body.setStatic(body, false)
+      } else {
+        cardEl.style.left = savedX + 'px'
+        cardEl.style.top = savedY + 'px'
+      }
     }
 
     const inputWrap = document.createElement('div')
@@ -759,10 +1004,12 @@ export function initSpatialView(supabase, options = {}) {
           textSpan.textContent = task.text
           if (ok) {
             const entry = cardMap.get(task.id)
-            if (entry) {
+            if (entry?.body) {
               requestAnimationFrame(() => {
                 syncBodyToElementSize(entry.element, entry.body)
               })
+            } else if (cleanupMode && entry) {
+              requestAnimationFrame(() => layoutGridInCleanupMode())
             }
           }
         })
@@ -882,9 +1129,14 @@ export function initSpatialView(supabase, options = {}) {
       }
       if (!task) continue
       state.tasks.push(task)
-      const x = centerX + (Math.random() - 0.5) * 60
-      setTimeout(() => addCardToWorld(task, x, SPAWN_Y), i * 120)
+      if (cleanupMode) {
+        addCardToGrid(task)
+      } else {
+        const x = centerX + (Math.random() - 0.5) * 60
+        setTimeout(() => addCardToWorld(task, x, SPAWN_Y), i * 120)
+      }
     }
+    if (cleanupMode) layoutGridInCleanupMode()
     updateEmptyState()
     updateFilterHint()
   }
@@ -1033,7 +1285,7 @@ export function initSpatialView(supabase, options = {}) {
       if (previous) await previous
       if (engine) {
         for (const [, { body, element }] of cardMap) {
-          World.remove(engine.world, body)
+          if (body) World.remove(engine.world, body)
           element.remove()
         }
         cardMap.clear()
@@ -1049,6 +1301,7 @@ export function initSpatialView(supabase, options = {}) {
       state.tasks = data || []
       state.loading = false
       syncPileToFilter()
+      if (cleanupMode) applyCleanupMode()
     })()
     await loadPromise
   }
@@ -1073,7 +1326,11 @@ export function initSpatialView(supabase, options = {}) {
     if (topWall) Body.setPosition(topWall, { x: rect.width / 2, y: -10 })
     engine.world.bounds = { min: { x: 0, y: 0 }, max: { x: rect.width, y: rect.height } }
     if (rect.width >= 10 && rect.height >= 10 && cardMap.size > 0) {
-      syncBodyToDom()
+      if (cleanupMode) {
+        layoutGridInCleanupMode()
+      } else {
+        syncBodyToDom()
+      }
     }
   }
 
@@ -1103,11 +1360,8 @@ export function initSpatialView(supabase, options = {}) {
   if (undoBtnEl) {
     undoBtnEl.addEventListener('click', handleUndoClick)
   }
-  if (undoDismissEl) {
-    undoDismissEl.addEventListener('click', handleDismissClick)
-  }
-
   setupFilters()
+  setupCleanupToggle()
   setupMoreMenu()
 
   if (emptyStateEl) {
@@ -1127,8 +1381,12 @@ export function initSpatialView(supabase, options = {}) {
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
         handleResize()
-        for (const [, { body }] of cardMap) clampBodyToStage(body)
-        syncBodyToDom()
+        if (!cleanupMode) {
+          for (const [, { body }] of cardMap) {
+            if (body) clampBodyToStage(body)
+          }
+          syncBodyToDom()
+        }
       })
     })
   }

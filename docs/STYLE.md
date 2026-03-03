@@ -34,10 +34,10 @@ Edit these in `tokens.css` to adjust the 4 background themes. Each theme has 8 t
 
 | Theme | Tokens |
 |-------|--------|
-| **Warm** | `--colorway-warm-bg-light`, `--colorway-warm-bg-dark`, `--colorway-warm-done-bg-*`, `--colorway-warm-card-border-*`, `--colorway-warm-accent-*` |
-| **Sand** | `--colorway-sand-bg-light`, `--colorway-sand-bg-dark`, `--colorway-sand-done-bg-*`, `--colorway-sand-card-border-*`, `--colorway-sand-accent-*` |
-| **Lavender** | `--colorway-lavender-bg-light`, `--colorway-lavender-bg-dark`, `--colorway-lavender-done-bg-*`, `--colorway-lavender-card-border-*`, `--colorway-lavender-accent-*` |
-| **Sage** | `--colorway-sage-bg-light`, `--colorway-sage-bg-dark`, `--colorway-sage-done-bg-*`, `--colorway-sage-card-border-*`, `--colorway-sage-accent-*` |
+| **Warm** | `--colorway-warm-bg-*`, `--colorway-warm-surface-*`, `--colorway-warm-surface-muted-*`, `--colorway-warm-done-bg-*`, `--colorway-warm-card-border-*`, `--colorway-warm-accent-*` |
+| **Sand** | `--colorway-sand-bg-*`, `--colorway-sand-surface-*`, `--colorway-sand-surface-muted-*`, `--colorway-sand-done-bg-*`, `--colorway-sand-card-border-*`, `--colorway-sand-accent-*` |
+| **Lavender** | `--colorway-lavender-bg-*`, `--colorway-lavender-surface-*`, `--colorway-lavender-surface-muted-*`, `--colorway-lavender-done-bg-*`, `--colorway-lavender-card-border-*`, `--colorway-lavender-accent-*` |
+| **Sage** | `--colorway-sage-bg-*`, `--colorway-sage-surface-*`, `--colorway-sage-surface-muted-*`, `--colorway-sage-done-bg-*`, `--colorway-sage-card-border-*`, `--colorway-sage-accent-*` |
 
 Each theme also defines `--done-card-bg` (semantic), which styles completed task cards with a themed tint.
 
@@ -76,7 +76,7 @@ Use for padding, margin, gap. File: `src/tokens.css`.
 
 Light theme is the default (`:root` in `tokens.css`). Dark theme overrides semantic tokens under `.dark`. Add the class to a root element (e.g. `<html class="dark">`) to switch.
 
-**Background colorways:** 4 options (Warm, Sand, Lavender, Sage) set via `data-bg` on `.spatial-app`. Each colorway overrides `--background-subtle`, `--done-card-bg`, and `--accent-default` / `--accent-emphasis` in `src/spatial.css`, so the CTA and done cards adapt to the chosen background. Components use semantic tokens, so no component CSS changes are needed.
+**Background colorways:** 4 options (Warm, Sand, Lavender, Sage) set via `data-bg` on `.spatial-app`. Each colorway overrides `--background-subtle`, `--background-default`, `--background-muted`, `--border-default`, `--done-card-bg`, `--card-border`, and `--accent-default` / `--accent-emphasis` in `src/spatial.css`, so cards, inputs, menus, and other UI elements adapt to the chosen background. Components use semantic tokens, so no component CSS changes are needed.
 
 ---
 

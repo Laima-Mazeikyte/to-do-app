@@ -6,7 +6,6 @@
   line-height: var(--line-height-normal);
   font-weight: 400;
 
-  color-scheme: light dark;
   color: var(--foreground-default);
   background-color: var(--background-default);
 
