@@ -45,14 +45,17 @@
         </div>
         <div class="spatial-top-right">
           <label for="spatial-search-input" class="sr-only">Search tasks</label>
-          <input
-            id="spatial-search-input"
-            class="spatial-search-input"
-            type="search"
-            placeholder="Search…"
-            aria-label="Search tasks"
-            autocomplete="off"
-          />
+          <div class="spatial-search-wrap">
+            <input
+              id="spatial-search-input"
+              class="spatial-search-input"
+              type="search"
+              placeholder="Search…"
+              aria-label="Search tasks"
+              autocomplete="off"
+            />
+            <button type="button" id="spatial-search-clear" class="spatial-search-clear" aria-label="Clear search" hidden>×</button>
+          </div>
           <div class="spatial-more-wrap">
             <button type="button" id="spatial-more-btn" class="spatial-btn-circle spatial-btn-circle--more" aria-label="More options" aria-haspopup="menu" aria-expanded="false">
               <span aria-hidden="true">⋮</span>

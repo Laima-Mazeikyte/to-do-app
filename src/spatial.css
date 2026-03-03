@@ -100,6 +100,7 @@
   min-width: 0;
   padding: var(--space-2) var(--space-3);
   font-size: var(--font-size-sm);
+  color: var(--foreground-default);
   border: none;
   background: transparent;
   box-sizing: border-box;
@@ -485,28 +486,63 @@ html.dark .spatial-app[data-bg="sage"] {
   outline-offset: 2px;
 }
 
-/* Search input - top right */
-.spatial-top-right .spatial-search-input {
-  width: 100%;
+/* Search input - top right, with clear button */
+.spatial-search-wrap {
+  display: flex;
+  align-items: center;
   min-width: 10rem;
   max-width: 14rem;
   height: var(--header-control-height);
-  padding: 0 var(--space-3);
-  font-size: var(--font-size-sm);
-  font-family: inherit;
+  box-sizing: border-box;
   border-radius: 9999px;
   border: 1px solid var(--border-default);
   background: var(--background-default);
-  color: var(--foreground-default);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-  box-sizing: border-box;
+  overflow: hidden;
 }
-.spatial-top-right .spatial-search-input:focus {
+.spatial-search-wrap:focus-within {
   outline: 2px solid var(--accent-default);
   outline-offset: 2px;
 }
+.spatial-top-right .spatial-search-input {
+  flex: 1;
+  min-width: 0;
+  padding: 0 var(--space-2) 0 var(--space-3);
+  font-size: var(--font-size-sm);
+  font-family: inherit;
+  border: none;
+  background: transparent;
+  color: var(--foreground-default);
+  box-sizing: border-box;
+}
+.spatial-top-right .spatial-search-input:focus {
+  outline: none;
+}
 .spatial-top-right .spatial-search-input::placeholder {
   color: var(--foreground-muted);
+}
+.spatial-search-clear {
+  flex-shrink: 0;
+  width: 2rem;
+  height: 2rem;
+  margin: var(--space-1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  border: none;
+  background: transparent;
+  color: var(--foreground-muted);
+  cursor: pointer;
+  font-size: 1.25rem;
+  line-height: 1;
+}
+.spatial-search-clear:hover {
+  color: var(--foreground-default);
+  background: var(--background-muted);
+}
+.spatial-search-clear[hidden] {
+  display: none;
 }
 
 /* Error: below form, non-intrusive */

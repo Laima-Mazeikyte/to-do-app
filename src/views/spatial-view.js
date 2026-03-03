@@ -910,8 +910,22 @@ export function initSpatialView(supabase, options = {}) {
     if (clearDoneBtn) {
       clearDoneBtn.addEventListener('click', () => clearVisibleTasks())
     }
+    const searchClearBtn = document.getElementById('spatial-search-clear')
     if (searchInputEl) {
-      searchInputEl.addEventListener('input', () => syncPileToFilter())
+      searchInputEl.addEventListener('input', () => {
+        if (searchClearBtn) searchClearBtn.hidden = !searchInputEl.value.trim()
+        syncPileToFilter()
+      })
+    }
+    if (searchClearBtn) {
+      searchClearBtn.addEventListener('click', () => {
+        if (searchInputEl) {
+          searchInputEl.value = ''
+          searchInputEl.focus()
+          searchClearBtn.hidden = true
+          syncPileToFilter()
+        }
+      })
     }
   }
 
