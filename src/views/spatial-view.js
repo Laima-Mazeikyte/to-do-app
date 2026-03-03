@@ -677,12 +677,14 @@ export function initSpatialView(supabase, options = {}) {
     function clampToStage(x, y) {
       const rect = getStageRect()
       const footerTopY = getFooterTopY()
-      const { halfW } = getBodyHalfSize(body)
+      const toolbarBottom = getToolbarBottomY()
+      const { halfW, halfH } = getBodyHalfSize(body)
       const bottomExtent = getBodyBottomExtent(body)
+      const minY = toolbarBottom - halfH
       const maxY = footerTopY - bottomExtent
       return {
         x: Math.max(halfW, Math.min(rect.width - halfW, x)),
-        y: Math.max(bottomExtent, Math.min(maxY, y))
+        y: Math.max(minY, Math.min(maxY, y))
       }
     }
 
@@ -724,15 +726,17 @@ export function initSpatialView(supabase, options = {}) {
   function clampBodyToStage(body) {
     const rect = getStageRect()
     const footerTopY = getFooterTopY()
-    const { halfW } = getBodyHalfSize(body)
+    const toolbarBottom = getToolbarBottomY()
+    const { halfW, halfH } = getBodyHalfSize(body)
     const bottomExtent = getBodyBottomExtent(body)
+    const minY = toolbarBottom - halfH
     const maxY = footerTopY - bottomExtent
     const x = Math.max(halfW, Math.min(rect.width - halfW, body.position.x))
     // Skip Y clamp when bouncing up – let the bounce play out before constraining
     const y =
       body.velocity.y < -1
         ? body.position.y
-        : Math.max(bottomExtent, Math.min(maxY, body.position.y))
+        : Math.max(minY, Math.min(maxY, body.position.y))
     if (x !== body.position.x || y !== body.position.y) {
       Body.setPosition(body, { x, y })
     }
